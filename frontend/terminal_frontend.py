@@ -41,6 +41,7 @@ class CTerminalFrontend(CFrontend):
         Start the message loop.
         '''
         message.logDebug("Starting terminal frontend message loop.", "CTerminalFrontend::start")
+        message.logDebug("Sending message '" + INITIAL_MESSAGE + "'", "CTerminalFrontend::start")
         self.sendMessage(INITIAL_MESSAGE)
         self.m_running = True
         while self.m_running:

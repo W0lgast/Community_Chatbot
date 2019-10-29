@@ -1,5 +1,5 @@
 '''
-We'll put utility functions here - timing decorators are here atm.
+We'll put utility functions here - timing decorators, exiting functions, and maths stuff are here atm.
 
 Kipp Freud
 28/10/2019

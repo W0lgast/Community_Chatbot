@@ -50,7 +50,7 @@ class CAgent(object):
     # 'private' members
     # ------------------------------------------------------------------
 
-    def _restrictSearchSpace(self, input):
+    def _restrictSearchSpace(self, input):      
         '''
         This will search the internal knowledge base :param:`self.m_knowledge_base` and will return a subset of the
         :class:`CKnowledgeUnit` instances contained by it in the form of a list. These knowledge units will

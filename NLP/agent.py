@@ -11,6 +11,7 @@ from util.message import message
 import util.utilities as ut
 from knowledge.knowledge_base import CKnowledgeBase
 
+
 # ------------------------------------------------------------------
 
 
@@ -18,6 +19,7 @@ class CAgent(object):
     """
     This is a class for answering generic questions using some database.
     """
+
     def __init__(self, knowledge_base):
         if not isinstance(knowledge_base, CKnowledgeBase):
             message.logError("Given knowledge base is not a CKnowledgeBase instance.",

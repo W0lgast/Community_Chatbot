@@ -10,7 +10,7 @@ Kipp Freud
 from util.message import message
 import util.utilities as ut
 from knowledge.knowledge_base import CKnowledgeBase
-from NLP.agent import CAgent
+from NLP.query_engine import CQueryEngine
 from frontend.terminal_frontend import CTerminalFrontend
 
 #------------------------------------------------------------------
@@ -30,7 +30,7 @@ def main():
     message.logDebug("Knowledge base loaded.","main::main")
 
     # initialise nlp module
-    agent = CAgent(knowledge)
+    agent = CQueryEngine(knowledge)
     message.logDebug("Agent loaded.","main::main")
 
     # initialize frontend

@@ -26,7 +26,7 @@ class CAgent(object):
                              "CAgent::__init__")
             ut.exit(0)
 
-        self.m_knowledge_base = knowledge_base
+        self._knowledge_base = knowledge_base
 
     # ------------------------------------------------------------------
     # 'public' members
@@ -54,7 +54,7 @@ class CAgent(object):
 
     def _restrictSearchSpace(self, input):
         '''
-        This will search the internal knowledge base :param:`self.m_knowledge_base` and will return a subset of the
+        This will search the internal knowledge base :param:`self._knowledge_base` and will return a subset of the
         :class:`CKnowledgeUnit` instances contained by it in the form of a list. These knowledge units will
         hopefully be the most relevant for answering the question.
 

@@ -26,8 +26,8 @@ class CKnowledgeUnit(object):
             message.logError("Given knowledge name is not a string instance.",
                              "CKnowledgeBase::__init__")
             ut.exit(0)
-        self.m_knowledge_name = knowledge_name
-        self.m_knowledge_content = knowledge_content
+        self._knowledge_name = knowledge_name
+        self._knowledge_content = knowledge_content
 
     # ------------------------------------------------------------------
     # 'public' members
@@ -37,13 +37,13 @@ class CKnowledgeUnit(object):
         '''
         :return: The :param:`self.m_knowledge_name`
         '''
-        return self.m_knowledge_name
+        return self._knowledge_name
 
     def getContent(self):
         '''
         :return: The :param:`self.m_knowledge_content`
         '''
-        return self.m_knowledge_content
+        return self._knowledge_content
 
     # ------------------------------------------------------------------
     # 'private' members

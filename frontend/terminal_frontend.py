@@ -28,7 +28,7 @@ class CTerminalFrontend(CFrontend):
         :param agent: Instance of :class:`CAgent` that handles messages.
         '''
         super(CTerminalFrontend, self).__init__(agent)
-        self.m_running = False
+        self._running = False
 
     def sendMessage(self, msg):
         '''
@@ -43,8 +43,8 @@ class CTerminalFrontend(CFrontend):
         message.logDebug("Starting terminal frontend message loop.", "CTerminalFrontend::start")
         message.logDebug("Sending message '" + INITIAL_MESSAGE + "'", "CTerminalFrontend::start")
         self.sendMessage(INITIAL_MESSAGE)
-        self.m_running = True
-        while self.m_running:
+        self._running = True
+        while self._running:
             ui = input("> ")
             if not isinstance(ui, str):
                 message.logError("User input must be a string.","CTerminalFrontend::start")
@@ -61,4 +61,4 @@ class CTerminalFrontend(CFrontend):
         '''
         Stop the message loop.
         '''
-        self.m_running = False
+        self._running = False

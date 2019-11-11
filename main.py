@@ -11,7 +11,9 @@ from util.message import message
 import util.utilities as ut
 from knowledge.knowledge_base import CKnowledgeBase
 from NLP.agent import CAgent
+from frontend.web_frontend import CWebFrontend
 from frontend.terminal_frontend import CTerminalFrontend
+
 
 #------------------------------------------------------------------
 
@@ -34,10 +36,12 @@ def main():
     message.logDebug("Agent loaded.","main::main")
 
     # initialize frontend
-    frontend = CTerminalFrontend(agent)
+    frontend = CWebFrontend(agent)
     frontend.start()
 
 
 if __name__ == "__main__":
     main()
     ut.exit(1)
+
+

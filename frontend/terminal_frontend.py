@@ -53,7 +53,7 @@ class CTerminalFrontend(CFrontend):
             if STOP_COMMAND == ui.lower():
                 self.stop()
             else:
-                msg = self.m_agent.getAnswer(ui)
+                msg = self._agent.get_answer(ui)
                 message.logDebug("Sending message: '" + msg + "'", "CTerminalFrontend::start")
                 self.sendMessage(msg)
 

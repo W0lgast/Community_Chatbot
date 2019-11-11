@@ -1,0 +1,22 @@
+<!-- Using Jinja mustaches to pass data from Python to HTML -->
+
+<h2>{{bot_name}} says: "{{greeting}}"</h2>
+<br>
+{{hints}}
+<br><br>
+
+{% if query is defined %}
+    You: {{ query }}
+    <br>
+{% endif %}
+
+{% if answer is defined %}
+    {{bot_name}}: <b>{{ answer }}</b>
+    <br>
+{% endif %}
+
+
+<form action="/{{channel}}" method="POST">
+    <input name="text">
+    <input type="submit">
+</form>

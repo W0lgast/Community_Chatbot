@@ -1,0 +1,8 @@
+.idea/
+NLP/__pycache__/
+data/__pycache__/
+frontend/__pycache__/
+knowledge/__pycache__/
+util/__pycache__/
+log.txt
+

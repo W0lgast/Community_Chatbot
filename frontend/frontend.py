@@ -5,14 +5,15 @@ Kipp Freud
 28/10/2019
 '''
 
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 from abc import ABC, abstractmethod
 
 from util.message import message
 import util.utilities as ut
 
-#------------------------------------------------------------------
+
+# ------------------------------------------------------------------
 
 class CFrontend(ABC):
     '''
@@ -24,7 +25,7 @@ class CFrontend(ABC):
         '''
         :param agent: a :class:`CAgent` to handle messages.
         '''
-        self.m_agent = agent
+        self._agent = agent
 
     @abstractmethod
     def sendMessage(self, msg):

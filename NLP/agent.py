@@ -11,6 +11,7 @@ from util.message import message
 import util.utilities as ut
 from knowledge.knowledge_base import CKnowledgeBase
 
+
 # ------------------------------------------------------------------
 
 
@@ -18,13 +19,14 @@ class CAgent(object):
     """
     This is a class for answering generic questions using some database.
     """
+
     def __init__(self, knowledge_base):
         if not isinstance(knowledge_base, CKnowledgeBase):
             message.logError("Given knowledge base is not a CKnowledgeBase instance.",
                              "CAgent::__init__")
             ut.exit(0)
 
-        self.m_knowledge_base = knowledge_base
+        self._knowledge_base = knowledge_base
 
     # ------------------------------------------------------------------
     # 'public' members
@@ -52,7 +54,7 @@ class CAgent(object):
 
     def _restrictSearchSpace(self, input):      
         '''
-        This will search the internal knowledge base :param:`self.m_knowledge_base` and will return a subset of the
+        This will search the internal knowledge base :param:`self._knowledge_base` and will return a subset of the
         :class:`CKnowledgeUnit` instances contained by it in the form of a list. These knowledge units will
         hopefully be the most relevant for answering the question.
 

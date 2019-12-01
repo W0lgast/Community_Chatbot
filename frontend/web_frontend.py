@@ -37,10 +37,13 @@ class CWebFrontend(CFrontend):
         :param agent: Instance of :class:`CAgent` that handles messages.
         '''
         super(CWebFrontend, self).__init__(agent)
+        self.queryHistory = []
+        self.responseHistory = []
 
         # Setup server and routes
         self.server = Flask(__name__)
         self.server.add_url_rule('/', 'home', self.home)
+        # TODO: fix this to direct all else to home except query
         #self.server.add_url_rule('/<path:dummy>', 'else_home', self.fallback)
         self.server.add_url_rule('/' + CHANNEL_NAME, \
                                  CHANNEL_NAME, \
@@ -74,16 +77,23 @@ class CWebFrontend(CFrontend):
     def query(self):
         text = request.form['text']
 
+        if not text :
+            return
+
+        self.queryHistory.append(text)
+
         if text.lower() == STOP_COMMAND:
-            return render_template('stop.html', \
-                            msg=STOP_MESSAGE)
-        print(self._agent.get_answer(text))
+            self.responseHistory.append(STOP_MESSAGE)
+
+        res = self._agent.get_answer(text)
+        self.responseHistory.append(res)
 
         return render_template('basic_form.html',
                                bot_name=CHATBOT_NAME,
                                greeting=INITIAL_MESSAGE,
-                               query=text,
-                               answer=self._agent.get_answer(text)
+                               queries=self.queryHistory,
+                               answers=self.responseHistory,
+                               channel=CHANNEL_NAME
                                )
 
 

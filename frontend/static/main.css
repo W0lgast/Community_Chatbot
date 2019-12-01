@@ -1,0 +1,15 @@
+* {
+    font-family: ABeeZee, sans-serif;
+}
+
+.u {
+    color: blue;
+}
+.bot {
+    color: red;
+}
+
+.botSpeak {
+    font-style: italic;
+    font-family: Courier;
+}

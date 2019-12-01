@@ -1,22 +1,36 @@
 <!-- Using Jinja mustaches to pass data from Python to HTML -->
+<link href='https://fonts.googleapis.com/css?family=ABeeZee' rel='stylesheet'>
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 
-<h2>{{bot_name}} says: "{{greeting}}"</h2>
+<h2>
+    <span class="bot">{{bot_name}}</span> says: "{{greeting}}"
+</h2>
 <br>
-{{hints}}
-<br><br>
 
-{% if query is defined %}
-    You: {{ query }}
-    <br>
-{% endif %}
+{% for i in queries %}
+    {% set query = queries[loop.index-1] %}
+    {% set answer = answers[loop.index-1] %}
 
-{% if answer is defined %}
-    {{bot_name}}: <b>{{ answer }}</b>
+    <span class="u">You</span>: {{ query }}
     <br>
+    <span class="bot">{{bot_name}}</span>:
+        <span class="botSpeak">{{ answer }}</span>
+    <br><br>
+{% endfor %}
+
+
+{% if answers is defined %}
+    <br><br>
 {% endif %}
 
 
 <form action="/{{channel}}" method="POST">
-    <input name="text">
+    <input id="queryBox" name="text">
     <input type="submit">
 </form>
+
+<script>
+    window.onload = function() {
+        document.getElementById("queryBox").focus();
+    };
+</script>

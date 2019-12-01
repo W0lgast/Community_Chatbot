@@ -42,6 +42,12 @@ class CKnowledgeBase(object):
     # 'public' members
     # ------------------------------------------------------------------
 
+    def getKnowledgeUnits(self):
+        """
+        :return: The :list: of :class:`CKnowledgeUnit` instances.
+        """
+        return self._knowledge
+
     # ------------------------------------------------------------------
     # 'private' members
     # ------------------------------------------------------------------

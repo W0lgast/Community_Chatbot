@@ -25,7 +25,7 @@ class CTerminalFrontend(CFrontend):
     '''
     def __init__(self, agent, **kwargs):
         '''
-        :param agent: Instance of :class:`CAgent` that handles messages.
+        :param agent: Instance of :class:`CQueryEngine` that handles messages.
         '''
         super(CTerminalFrontend, self).__init__(agent)
         self._running = False

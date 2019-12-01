@@ -7,6 +7,8 @@ Kipp Freud
 
 # ------------------------------------------------------------------
 
+from allennlp.predictors.predictor import Predictor
+
 from util.message import message
 import util.utilities as ut
 from knowledge.knowledge_base import CKnowledgeBase
@@ -14,8 +16,12 @@ from knowledge.knowledge_base import CKnowledgeBase
 
 # ------------------------------------------------------------------
 
+PREDICTOR_PATH = "https://storage.googleapis.com/allennlp-public-models/bidaf-elmo-model-2018.11.30-charpad.tar.gz"
+BEST_STRING_KEY = "best_span_str"
 
-class CAgent(object):
+# ------------------------------------------------------------------
+
+class CQueryEngine(object):
     """
     This is a class for answering generic questions using some database.
     """
@@ -23,9 +29,10 @@ class CAgent(object):
     def __init__(self, knowledge_base):
         if not isinstance(knowledge_base, CKnowledgeBase):
             message.logError("Given knowledge base is not a CKnowledgeBase instance.",
-                             "CAgent::__init__")
+                             "CQueryEngine::__init__")
             ut.exit(0)
 
+        self._predictor = Predictor.from_path(PREDICTOR_PATH)
         self._knowledge_base = knowledge_base
 
     # ------------------------------------------------------------------
@@ -40,7 +47,7 @@ class CAgent(object):
         :param input: The string question.
         """
         if not isinstance(input, str):
-            message.logError("Given input must be a string instance", "CAgent::getAnswer")
+            message.logError("Given input must be a string instance", "CQueryEngine::getAnswer")
             ut.exit(0)
 
         knowledge_list = self._restrictSearchSpace(input)
@@ -61,7 +68,7 @@ class CAgent(object):
         :param input: A string question.
         :return: A :list: of :class:`CKnowledgeUnit` instances.
         '''
-        return []
+        return self._knowledge_base.getKnowledgeUnits()
 
     def _getResponse(self, input, knowledge_list):
         '''
@@ -74,4 +81,10 @@ class CAgent(object):
         :func:`_restrictSearchSpeace`.
         '''
 
-        return "I don't want to help you at the moment, ask me another time."
+        knowledge_strings = [k_u.getContent() for k_u in knowledge_list]
+        knowledge_string = "\n".join(knowledge_strings)
+        res = self._predictor.predict(
+            passage=knowledge_string,
+            question=input
+        )
+        return res[BEST_STRING_KEY]

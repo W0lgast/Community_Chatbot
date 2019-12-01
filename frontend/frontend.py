@@ -23,7 +23,7 @@ class CFrontend(ABC):
 
     def __init__(self, agent):
         '''
-        :param agent: a :class:`CAgent` to handle messages.
+        :param agent: a :class:`CQueryEngine` to handle messages.
         '''
         self._agent = agent
 

@@ -39,7 +39,7 @@ class CMessage(object):
         :param str funcname: Is an optional argument that is used for printing the name of \
         the function where the message is coming from.
         '''
-        self._logLevel(message, ERROR_TAG, funcname)
+        self._log(message, ERROR_TAG, funcname)
 
     def logWarning(self, message, funcname=''):
         '''
@@ -49,7 +49,7 @@ class CMessage(object):
         :param str funcname: Is an optional argument that is used for printing the name of \
         the function where the message is coming from.
         '''
-        self._logLevel(message, WARNING_TAG, funcname)
+        self._log(message, WARNING_TAG, funcname)
 
     def logDebug(self, message, funcname=''):
         '''

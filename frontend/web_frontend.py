@@ -15,7 +15,6 @@ from flask import Flask, request, Response, render_template
 # ------------------------------------------------------------------
 
 CHATBOT_NAME = "KnowBot"
-INITIAL_MESSAGE = "How can I help you?"
 STOP_HINT = "(enter 'stop' at any time to end session)"
 STOP_COMMAND = "stop"
 STOP_MESSAGE = "Goodbye, my sweet."
@@ -57,7 +56,7 @@ class CWebFrontend(CFrontend):
         '''
         return render_template('basic_form.html',
                                bot_name=CHATBOT_NAME,
-                               greeting=INITIAL_MESSAGE,
+                               greeting=self.get_initial_message(),
                                hints=STOP_HINT,
                                channel=CHANNEL_NAME
                                )
@@ -85,12 +84,12 @@ class CWebFrontend(CFrontend):
         if text.lower() == STOP_COMMAND:
             self.responseHistory.append(STOP_MESSAGE)
 
-        res = self._agent.get_answer(text)
+        res = self._agent.process_input(text)
         self.responseHistory.append(res)
 
         return render_template('basic_form.html',
                                bot_name=CHATBOT_NAME,
-                               greeting=INITIAL_MESSAGE,
+                               greeting=self.get_initial_message(),
                                queries=self.queryHistory,
                                answers=self.responseHistory,
                                channel=CHANNEL_NAME

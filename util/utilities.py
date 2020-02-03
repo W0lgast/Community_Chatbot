@@ -10,6 +10,9 @@ Kipp Freud
 import time
 from math import sqrt
 import sys
+from ast import literal_eval as lit
+from ast import parse
+import decimal
 
 from util.message import message
 
@@ -87,3 +90,20 @@ def stdEstimate(x):
     for v in x:
         y.append( (v - meanx)*(v - meanx) )
     return sqrt(norm * sum(y))
+
+#-----------------------------------------------------------------------------------------
+# string functions
+#-----------------------------------------------------------------------------------------
+
+def parseStr(str):
+    """
+    Converts string representation of a literal to actual literal.
+    """
+    str = str.replace("null", "None").replace("false","False").replace("true","True")
+    return lit(str)
+
+
+
+
+
+

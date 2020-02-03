@@ -12,7 +12,11 @@ from allennlp.predictors.predictor import Predictor
 from util.message import message
 import util.utilities as ut
 from knowledge.knowledge_base import CKnowledgeBase
+from NLP.agent import CAgent
 
+# ------------------------------------------------------------------
+
+INITIAL_MESSAGE = "What would you like to know about Knowle West?"
 
 # ------------------------------------------------------------------
 
@@ -21,17 +25,17 @@ BEST_STRING_KEY = "best_span_str"
 
 # ------------------------------------------------------------------
 
-class CQueryEngine(object):
+class CQueryEngine(CAgent):
     """
     This is a class for answering generic questions using some database.
     """
-
-    def __init__(self, knowledge_base):
+    def __init__(self, knowledge_base, name="Query Engine"):
         if not isinstance(knowledge_base, CKnowledgeBase):
             message.logError("Given knowledge base is not a CKnowledgeBase instance.",
                              "CQueryEngine::__init__")
             ut.exit(0)
-
+        super(CQueryEngine, self).__init__(name)
+        self._initial_message = INITIAL_MESSAGE
         self._predictor = Predictor.from_path(PREDICTOR_PATH)
         self._knowledge_base = knowledge_base
 
@@ -39,7 +43,7 @@ class CQueryEngine(object):
     # 'public' members
     # ------------------------------------------------------------------
 
-    def get_answer(self, input):
+    def process_input(self, input):
         """
         Will return an answer to the question given in input.
         Currently it will always return "I don't want to help you at the moment, ask me another time."
@@ -49,10 +53,9 @@ class CQueryEngine(object):
         if not isinstance(input, str):
             message.logError("Given input must be a string instance", "CQueryEngine::getAnswer")
             ut.exit(0)
-
         knowledge_list = self._restrictSearchSpace(input)
         response = self._getResponse(input, knowledge_list)
-
+        self._update.append(response)
         return response
 
     # ------------------------------------------------------------------

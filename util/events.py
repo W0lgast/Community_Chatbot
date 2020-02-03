@@ -1,0 +1,42 @@
+"""
+Tools for gathering event info from ENTS24 API.
+
+Kipp Freud
+30/01/2020
+"""
+
+# --------------------------------
+
+import requests as r
+
+import util.utilities as ut
+
+# --------------------------------
+
+CLIENT_ID = "2e16b35a18c40cf04711903c1efddfa03e315cd4"
+CLIENT_SECRET = "4a7ba6ef8ea6c792e41f716087e6796ce530de08"
+AUTHORIZATION_URL = 'https://api.ents24.com/auth/token'
+response = r.post(AUTHORIZATION_URL,
+                  data={'client_id': CLIENT_ID,
+                        'client_secret': CLIENT_SECRET})
+AUTH_DICT = ut.parseStr(response._content.decode())
+
+# -----------------------------------------------------------------------------------------
+# public functions
+# -----------------------------------------------------------------------------------------
+
+def getEventsList():
+    response = r.get('https://api.ents24.com/event/list',
+                     headers={"Authorization": AUTH_DICT["access_token"]},
+                     params={"location": "postcode:BS4 1WH",
+                             "radius_distance": 5,
+                             "distance_unit": "mi"})
+    str = response._content.decode()
+    return ut.parseStr(str)
+
+def getEventByID(id):
+    response = r.get('https://api.ents24.com/event/read',
+                     headers={"Authorization": AUTH_DICT["access_token"]},
+                     params={"id": id})
+    str = response._content.decode()
+    return ut.parseStr(str)

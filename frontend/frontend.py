@@ -12,7 +12,6 @@ from abc import ABC, abstractmethod
 from util.message import message
 import util.utilities as ut
 
-
 # ------------------------------------------------------------------
 
 class CFrontend(ABC):
@@ -35,3 +34,6 @@ class CFrontend(ABC):
         message.logError("This function must be overwritten in derived classes.",
                          "CFrontend::sendMessage")
         ut.exit(0)
+
+    def get_initial_message(self):
+        return self._agent.get_initial_message()

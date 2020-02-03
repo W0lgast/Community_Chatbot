@@ -9,12 +9,14 @@ Kipp Freud
 
 import allennlp as al
 from allennlp.predictors.predictor import Predictor
+import util.utilities as ut
+import util.events as ents
+import requests as r
+from ast import literal_eval as lit
+import ast
 
 # --------------------------------
 
-predictor = Predictor.from_path("https://storage.googleapis.com/allennlp-public-models/bidaf-elmo-model-2018.11.30-charpad.tar.gz")
-res = predictor.predict(
-  passage="her vision said 'hello!'",
-  question="What did Penelope's vision say?"
-)
-print("yo")
+events = ents.getEventsList()
+for event in events:
+    event['description'] = ents.getEventByID(event["id"])['description']

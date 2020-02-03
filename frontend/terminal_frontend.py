@@ -14,7 +14,6 @@ from frontend.frontend import CFrontend
 #------------------------------------------------------------------
 
 CHATBOT_NAME = "Knowledge_Bot"
-INITIAL_MESSAGE = "How can I help you?"
 STOP_COMMAND = "stop"
 
 #------------------------------------------------------------------
@@ -40,9 +39,10 @@ class CTerminalFrontend(CFrontend):
         '''
         Start the message loop.
         '''
+        initial_message = self.get_initial_message()
         message.logDebug("Starting terminal frontend message loop.", "CTerminalFrontend::start")
-        message.logDebug("Sending message '" + INITIAL_MESSAGE + "'", "CTerminalFrontend::start")
-        self.sendMessage(INITIAL_MESSAGE)
+        message.logDebug("Sending message '" + initial_message + "'", "CTerminalFrontend::start")
+        self.sendMessage(initial_message)
         self._running = True
         while self._running:
             ui = input("> ")
@@ -53,7 +53,7 @@ class CTerminalFrontend(CFrontend):
             if STOP_COMMAND == ui.lower():
                 self.stop()
             else:
-                msg = self._agent.get_answer(ui)
+                msg = self._agent.process_input(ui)
                 message.logDebug("Sending message: '" + msg + "'", "CTerminalFrontend::start")
                 self.sendMessage(msg)
 

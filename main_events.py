@@ -12,7 +12,9 @@ import util.utilities as ut
 from knowledge.knowledge_base import CKnowledgeBase
 from frontend.web_frontend import CWebFrontend
 from NLP.query_engine import CQueryEngine
+from NLP.event_engine import CEventEngine
 from frontend.terminal_frontend import CTerminalFrontend
+from frontend.botui_frontend import CBotUIFrontend
 
 #------------------------------------------------------------------
 
@@ -26,21 +28,16 @@ def main():
     This will initialize the chatbot.
     '''
 
-    # initialise knowledge base
-    knowledge = CKnowledgeBase(PATH_TO_DATA)
-    message.logDebug("Knowledge base loaded.","main::main")
-
     # initialise nlp module
-    agent = CQueryEngine(knowledge)
+    agent = CEventEngine()
     message.logDebug("Agent loaded.","main::main")
 
     # initialize frontend
-    frontend = CWebFrontend(agent)
+    frontend = CBotUIFrontend(agent)
     frontend.start()
 
 
 if __name__ == "__main__":
     main()
     ut.exit(1)
-
 

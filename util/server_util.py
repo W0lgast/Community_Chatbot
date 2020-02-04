@@ -10,6 +10,10 @@ Kipp Freud
 from aiohttp import web
 import socketio
 
+from util.message import message
+import util.utilities as ut
+from frontend.presentation import STANDARD_MSG, CALENDAR_MSG, GENRE_BTN_MSG
+
 #------------------------------------------------------------------
 
 SOCKET_SERVER = socketio.AsyncServer(async_handlers=True,
@@ -34,7 +38,31 @@ async def sendClientMessage(sid, msg):
     """
     Sends a message to specified client using given socket ID.
     """
-    await SOCKET_SERVER.emit('show_message', msg, room=sid)
+    if not isinstance(msg, tuple):
+        message.logError("msg needs to be a tuple of length 2",
+                         "server_util::sendClientMessage")
+        ut.exit(0)
+    if len(msg) != 2:
+        message.logError("msg needs to be a tuple of length 2",
+                         "server_util::sendClientMessage")
+        ut.exit(0)
+    message_type = msg[1]
+    message_content = msg[0]
+    if message_type == STANDARD_MSG:
+        await SOCKET_SERVER.emit('show_message', message_content, room=sid)
+    elif message_type == CALENDAR_MSG:
+        await SOCKET_SERVER.emit('show_message', message_content, room=sid)
+        await SOCKET_SERVER.emit('show_calendar_message', "NONE", room=sid)
+    elif message_type == GENRE_BTN_MSG:
+        msgs = message_content.split(":")
+        await SOCKET_SERVER.emit('show_message', msgs[0], room=sid)
+        for msg in msgs[1::]:
+            await SOCKET_SERVER.emit('show_clickable_message', msg, room=sid)
+    else:
+        message.logError("Unknown message type.",
+                         "server_util::sendClientMessage")
+        ut.exit(0)
+
 
 async def sendClientsMessage(msg):
     """

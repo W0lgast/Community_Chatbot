@@ -39,7 +39,7 @@
     _options = {
       debug: false,
       fontawesome: true,
-      searchselect: true
+      searchselect: true,
     },
     _container, // the outermost Element. Needed to scroll to bottom, for now.
     _interface = {}, // methods returned by a BotUI() instance.
@@ -104,17 +104,29 @@
       template: `
                 <div class=\"botui botui-container\" v-botui-container>
                   <div class=\"botui-messages-container\">
-                    <div v-for=\"msg in messages\" class=\"botui-message\" :class=\"msg.cssClass\" v-botui-scroll>
+                    <div v-for=\"msg in messages\" :class=\"[\'botui-message\', \'msg.cssClass\', msg.type, {clicked: msg.clicked}]\" v-botui-scroll>
                       <transition name=\"slide-fade\">
                         <div v-if=\"msg.visible\">
                           <div v-if=\"msg.photo && !msg.loading\" :class=\"[\'profil\', {human: msg.human, \'agent\': !msg.human}]\"> 
                             <img :class=\"[{human: msg.human, \'agent\': !msg.human}]\">
                           </div>
-                          <div :class=\"[{human: msg.human, \'botui-message-content\': true}, msg.type]\">
+                          <div :class=\"[{human: msg.human, \'botui-message-content\': true}, msg.type, {clicked: msg.clicked}]\">
                             <span v-if=\"msg.type == \'text\'\" v-text=\"msg.content\" v-botui-markdown>
                             </span>
                             <span v-if=\"msg.type == \'html\'\" v-html=\"msg.content\">
                             </span> 
+                            <div v-if=\"msg.type == \'calendar\'\">
+                              <v-date-picker 
+                                mode='multiple' 
+                                v-model='selectedDate'   
+                                color="green"
+                                is-dark
+                                is-inline
+                              />
+                            </div>
+                            <div v-if=\"msg.type == \'clickable\'\" v-on:click="clicked(msg)">
+                              <span v-if=\"msg.type == \'clickable\'\" v-text=\"msg.content\" v-botui-markdown>
+                            </div>
                             <iframe v-if=\"msg.type == \'embed\'\" :src=\"msg.content\" frameborder=\"0\" allowfullscreen>
                             </iframe>
                           </div>
@@ -167,7 +179,17 @@
                       </button>
                     </form>
                     <div v-if=\"action.type == \'button\'\" class=\"botui-actions-buttons\" :class=\"action.cssClass\"> 
-                      <button type=\"button\" :class=\"button.cssClass\" class=\"botui-actions-buttons-button\" v-for=\"button in action.button.buttons\" @click=\"handle_action_button(button)\">
+                      <button v-if=\"button.button_type == \'std\'\" type=\"button\" :class=\"button.cssClass\" class=\"botui-actions-buttons-button\" v-for=\"button in action.button.buttons\" @click=\"handle_action_button(button)\">
+                        <i v-if=\"button.icon\" class=\"botui-icon botui-action-button-icon fa\" :class=\"\'fa-\' + button.icon\">
+                        </i> 
+                        {{button.text}}
+                      </button>
+                      <button v-if=\"button.button_type == \'calendar_button\'\" type=\"button\" :class=\"button.cssClass\" class=\"botui-actions-buttons-button\" v-for=\"button in action.button.buttons\" @click=\"handle_action_calendar_button(button)\">
+                        <i v-if=\"button.icon\" class=\"botui-icon botui-action-button-icon fa\" :class=\"\'fa-\' + button.icon\">
+                        </i> 
+                        {{button.text}}
+                      </button>
+                      <button v-if=\"button.button_type == \'confirm_clickable\'\" type=\"button\" :class=\"button.cssClass\" class=\"botui-actions-buttons-button\" v-for=\"button in action.button.buttons\" @click=\"handle_action_confirm_clickable_button(button)\">
                         <i v-if=\"button.icon\" class=\"botui-icon botui-action-button-icon fa\" :class=\"\'fa-\' + button.icon\">
                         </i> 
                         {{button.text}}
@@ -207,9 +229,15 @@
             show: false,
             type: 'text',
             autoHide: true,
-            addMessage: true
+            addMessage: true,
+            button_type: 'std'
           },
-          messages: []
+          messages: [],
+          // Data used by the date picker
+          mode: 'multiple',
+          selectedDate: null,
+          // currently relevent clicked button
+          clicked_msgs: []
         };
       },
       computed: {
@@ -218,7 +246,89 @@
         }
       },
     	methods: {
-    		handle_action_button: function (button) {
+        clicked: function(msg) {
+
+          if(msg.disabled) { return false }
+          
+          msg.clicked = !msg.clicked;
+
+          var inClickedMsgs = false;
+          for( var i = 0; i < this.clicked_msgs.length; i++){
+            if(this.clicked_msgs[i] == msg){
+              inClickedMsgs = true;
+              this.clicked_msgs.splice(i,1)
+              break;
+            }
+          }
+          if(inClickedMsgs==false){
+            this.clicked_msgs.push(msg);
+          }
+
+        },
+
+    		handle_action_calendar_button: function (button) {
+          //console.log(this.selectedDate)
+          //console.log(this.selectedDate[0].toDateString())
+          //console.log(this.selectedDate[0].toUTCString())
+          console.log(this.selectedDate[0].toISOString())
+
+          var ret = ""
+          for (var i = 0; i < this.selectedDate.length; i++) {
+            ret += this.selectedDate[i].toISOString().split("T")[0] + ", "
+          }
+          ret = ret.substring(0, ret.length - 2);
+
+          //console.log(this.selectedDate[0].toString())
+          for (var i = 0; i < this.action.button.buttons.length; i++) {
+            if(this.action.button.buttons[i].value == button.value && typeof(this.action.button.buttons[i].event) == 'function') {
+              this.action.button.buttons[i].event(button);
+              if (this.action.button.buttons[i].actionStop) return false;
+              break;
+            }
+          }
+
+          _handleAction(ret);
+
+          _actionResolve({
+            type: 'text',
+            value: ret
+          });
+        },
+        handle_action_confirm_clickable_button: function (button) {
+          //console.log(this.selectedDate)
+          //console.log(this.selectedDate[0].toDateString())
+          //console.log(this.selectedDate[0].toUTCString())
+          console.log(this.clicked_msgs)
+
+          if(this.clicked_msgs.length == 0) { return false }
+
+          var ret = ""
+          for (var i = 0; i < this.clicked_msgs.length; i++) {
+            ret += this.clicked_msgs[i].content + ", "
+          }
+          ret = ret.substring(0, ret.length - 2);
+
+          //console.log(this.selectedDate[0].toString())
+          for (var i = 0; i < this.action.button.buttons.length; i++) {
+            if(this.action.button.buttons[i].value == button.value && typeof(this.action.button.buttons[i].event) == 'function') {
+              this.action.button.buttons[i].event(button);
+              if (this.action.button.buttons[i].actionStop) return false;
+              break;
+            }
+          }
+
+          for (var i = 0; i < this.messages; i++) {
+            this.messages.disabled = true
+          }
+
+          _handleAction(ret);
+
+          _actionResolve({
+            type: 'text',
+            value: ret
+          });
+        },
+        handle_action_button: function (button) {
           for (var i = 0; i < this.action.button.buttons.length; i++) {
             if(this.action.button.buttons[i].value == button.value && typeof(this.action.button.buttons[i].event) == 'function') {
               this.action.button.buttons[i].event(button);
@@ -335,6 +445,8 @@
         throw Error('BotUI: "content" is required in a non-loading message object.');
       }
 
+      _msg.clicked = _msg.clicked || false;
+      _msg.disabled = _msg.disabled || false;
       _msg.type = _msg.type || 'text';
       _msg.visible = (_msg.delay || _msg.loading) ? false : true;
       var _index = _instance.messages.push(_msg) - 1;

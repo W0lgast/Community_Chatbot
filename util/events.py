@@ -25,14 +25,24 @@ AUTH_DICT = ut.parseStr(response._content.decode())
 # public functions
 # -----------------------------------------------------------------------------------------
 
-def getEventsList():
-    response = r.get('https://api.ents24.com/event/list',
-                     headers={"Authorization": AUTH_DICT["access_token"]},
-                     params={"location": "postcode:BS4 1WH",
-                             "radius_distance": 5,
-                             "distance_unit": "mi"})
-    str = response._content.decode()
-    return ut.parseStr(str)
+def getEventsList(location="postcode:BS4 1WH",
+                  radius_distance=5,
+                  date=None,
+                  genre=None):
+    if isinstance(genre, str): genre = genre.lower()
+    params = {"location": location,
+              "radius_distance": radius_distance,
+              "distance_unit": "mi",
+              "date": date,
+              "genre": genre}
+    params = {k: v for k, v in params.items() if v is not None}
+
+    resp = r.get('https://api.ents24.com/event/list',
+                 headers={"Authorization": AUTH_DICT["access_token"]},
+                 params=params)
+    ret = resp._content.decode()
+    if ret == '': return []
+    return ut.parseStr(ret)
 
 def getEventByID(id):
     response = r.get('https://api.ents24.com/event/read',

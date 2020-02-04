@@ -56,7 +56,8 @@ async def onConnection(sid, socket):
     message.logDebug("New user '" + sid + "' connected.", "botui_frontend::onConnection")
     #send initial message
     initial_message = CBotUIFrontend.get_initial_message()
-    await sendClientMessage(sid, initial_message)
+    for msg in initial_message:
+        await sendClientMessage(sid, msg)
 
 @SOCKET_SERVER.on('disconnect')
 def onDisconnection(sid):

@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 
 from util.message import message
 import util.utilities as ut
+from frontend.presentation import STANDARD_MSG, CALENDAR_MSG
 
 # ------------------------------------------------------------------
 
@@ -27,7 +28,7 @@ class CAgent(ABC):
             message.logError("Agents name is not a string instance.",
                              "CAgent::__init__")
             ut.exit(0)
-        self._initial_message = INITIAL_MESSAGE
+        self._initial_message = [self._make_standard_message(INITIAL_MESSAGE)]
         self._update = []
 
     # ------------------------------------------------------------------
@@ -57,3 +58,13 @@ class CAgent(ABC):
 
     def get_initial_message(self):
         return self._initial_message
+
+    # ------------------------------------------------------------------
+    # 'private' members
+    # ------------------------------------------------------------------
+
+    def _make_standard_message(self, msg):
+        return (msg, STANDARD_MSG)
+
+    def _make_calander_message(self, msg):
+        return (msg, CALENDAR_MSG)

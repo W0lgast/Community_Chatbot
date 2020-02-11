@@ -8,8 +8,21 @@ Kipp Freud
 # --------------------------------
 
 import requests as r
+import itertools as it
 
 import util.utilities as ut
+from util.message import message
+
+# --------------------------------
+
+GENRE_SYNONYMS = {
+    "Music": ["folk", "indie", "jazz", "acoustic", "rock", "country", "world", "pop", "rapandhiphop", "ska", "metal",
+              "1960s", "1970s", "1980", "1990", "americana", "punk", "alternative", "rocknroll", "covers", "tribute",
+              "blues", "rnbandsoul", "electronic"],
+    "Comedy": ["comedy"],
+    "Theatre": ["theatreandarts", "play", "opera", "musical", "panto", "ballet", "ballroom", "westend"],
+    "Shows & Events": ["adult", "cabaret", "showsandevents", "talk", "family", "circus", "magic", "poetry",
+                       "sports", "tv", "online", "kids"]}
 
 # --------------------------------
 
@@ -21,18 +34,54 @@ response = r.post(AUTHORIZATION_URL,
                         'client_secret': CLIENT_SECRET})
 AUTH_DICT = ut.parseStr(response._content.decode())
 
+# --------------------------------
+
+START_DATE = "startDate"
+END_DATE = "endDate"
+GENRE_KEY = "genre"
+HEADLINE_KEY = "headline"
+TITLE_KEY = "title"
+IMAGE_KEY = "image"
+IMAGE_URL_KEY = "url"
+WEBLINK_KEY = "webLink"
+
 # -----------------------------------------------------------------------------------------
 # public functions
 # -----------------------------------------------------------------------------------------
 
-def getEventsList():
-    response = r.get('https://api.ents24.com/event/list',
-                     headers={"Authorization": AUTH_DICT["access_token"]},
-                     params={"location": "postcode:BS4 1WH",
-                             "radius_distance": 5,
-                             "distance_unit": "mi"})
-    str = response._content.decode()
-    return ut.parseStr(str)
+def getEventsList(location="postcode:BS4 1NL",
+                  radius_distance=5,
+                  date=None,
+                  genre=None):
+    if isinstance(genre, str):
+        genre = genre.lower()
+        if genre not in [g.lower() for g in GENRE_SYNONYMS.keys()]:
+            message.logError("Unknown Genre", "events::getEventsList")
+            ut.exit(0)
+    params = {"location": location,
+              "radius_distance": radius_distance,
+              "distance_unit": "mi",
+              "date": date,
+              "genre": genre}
+    params = {k: v for k, v in params.items() if v is not None}
+    if "genre" in params.keys():
+        if isinstance(params["genre"], list):
+            new_g = [GENRE_SYNONYMS[g.capitalize()] for g in params["genre"]]
+            new_g = [item for sublist in new_g for item in sublist]
+            params["genre"] = new_g
+        else:
+            new_g = GENRE_SYNONYMS[params["genre"]]
+            params["genre"] = new_g
+    all_params = _generateParams(params)
+    all_events = []
+    all_ids = []
+    for p in all_params:
+        evs = _getEvents(p)
+        for ev in evs:
+            if ev["id"] not in all_ids:
+                all_events.append(ev)
+                all_ids.append(ev["id"])
+    return all_events
 
 def getEventByID(id):
     response = r.get('https://api.ents24.com/event/read',
@@ -40,3 +89,57 @@ def getEventByID(id):
                      params={"id": id})
     str = response._content.decode()
     return ut.parseStr(str)
+
+# -----------------------------------------------------------------------------------------
+# private functions
+# -----------------------------------------------------------------------------------------
+
+def _generateParams(param_dict):
+    """
+    Will take a dictionary, where *potentially* some values are lists. Will return a list of dictionaries
+    with no lists, where each possible list member combination is included.
+    """
+    keys = param_dict.keys()
+    list_key = None
+    for key in keys:
+        if isinstance(param_dict[key], list):
+            list_key = key
+            break
+    if list_key is None:
+        return [param_dict]
+    new_dics = []
+    for list_val in param_dict[list_key]:
+        new_dict = {}
+        for key in keys:
+            if key is not list_key:
+                new_dict[key] = param_dict[key]
+            else:
+                new_dict[key] = list_val
+        new_dics.append(new_dict)
+    ret = []
+    for dic in new_dics:
+        ret += _generateParams(dic)
+    return ret
+
+def _getEvents(params):
+    """
+    Gets the events form the ENTS24 API. Returns events dict.
+    """
+    params["results_per_page"] = 100
+    params["full_description"] = 1
+    resp = None
+    ret = []
+    while True:
+        if resp is not None:
+            params["page"] = resp.headers._store["x-next-page"][1]
+        resp = r.get('https://api.ents24.com/event/list',
+                     headers={"Authorization": AUTH_DICT["access_token"]},
+                     params=params)
+        if resp.status_code not in [200, 204]:
+            message.logError("Error code in response.", "events::getEventsList")
+            ut.exit(0)
+        lst = resp._content.decode()
+        if lst == '':
+            return ret
+        lst = ut.parseStr(lst)
+        ret += lst

@@ -35,7 +35,7 @@ class CQueryEngine(CAgent):
                              "CQueryEngine::__init__")
             ut.exit(0)
         super(CQueryEngine, self).__init__(name)
-        self._initial_message = INITIAL_MESSAGE
+        self._initial_message = [self._make_standard_message(INITIAL_MESSAGE)]
         self._predictor = Predictor.from_path(PREDICTOR_PATH)
         self._knowledge_base = knowledge_base
 
@@ -55,8 +55,9 @@ class CQueryEngine(CAgent):
             ut.exit(0)
         knowledge_list = self._restrictSearchSpace(input)
         response = self._getResponse(input, knowledge_list)
+        response = self._make_standard_message(response)
         self._update.append(response)
-        return response
+        return [response]
 
     # ------------------------------------------------------------------
     # 'private' members

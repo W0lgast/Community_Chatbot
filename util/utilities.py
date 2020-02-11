@@ -11,8 +11,7 @@ import time
 from math import sqrt
 import sys
 from ast import literal_eval as lit
-from ast import parse
-import decimal
+import random
 
 from util.message import message
 
@@ -92,6 +91,20 @@ def stdEstimate(x):
     return sqrt(norm * sum(y))
 
 #-----------------------------------------------------------------------------------------
+# list functions
+#-----------------------------------------------------------------------------------------
+
+def randomSample(lst, num_sample):
+    """Will return a randomly selected num_sample elements from lst."""
+    if not isinstance(lst, list):
+        message.logError("lst must be a list instance.", "utilities::randomSample")
+        exit(0)
+    if not isinstance(num_sample, int):
+        message.logError("num_sample must be an int instance.", "utilities::randomSample")
+        exit(0)
+    return random.sample(lst, num_sample)
+
+#-----------------------------------------------------------------------------------------
 # string functions
 #-----------------------------------------------------------------------------------------
 
@@ -102,8 +115,40 @@ def parseStr(str):
     str = str.replace("null", "None").replace("false","False").replace("true","True")
     return lit(str)
 
+#-----------------------------------------------------------------------------------------
+# date functions
+#-----------------------------------------------------------------------------------------
 
+def dateCheck(date, start_date, end_date):
+    """
+    Will check if :param:`date` is between :param:`start_date` and :param:`end_date`.
 
+    :return: Boolean.
+    """
+    date = date.split("-")
+    start_date = start_date.split("-")
+    if not _dateCheck(start_date, date):
+        return False
+    end_date = end_date.split("-")
+    return _dateCheck(date, end_date)
 
+def _dateCheck(date_1, date_2):
+    """
+    Will return True if date_1 is before or equal to date_2.
+    Date params are lists with 3 elements, year, month, day.
+    """
+    if date_1[0] < date_2[0]:
+        return True
+    if date_1[0] > date_2[0]:
+        return False
+    if date_1[1] < date_2[1]:
+        return True
+    if date_1[1] > date_2[1]:
+        return False
+    if date_1[2] < date_2[2]:
+        return True
+    if date_1[2] > date_2[2]:
+        return False
+    return True
 
 

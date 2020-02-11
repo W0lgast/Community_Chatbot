@@ -17,6 +17,23 @@ botui.message
 });
 
 //send message to user via bot ui
+socket.on('show_event_message', function(message) {
+    var full_msg = message.split("::");
+    console.log(full_msg[0]);
+    console.log(full_msg[1]);
+    botui.message
+        .bot({
+            type: 'event',
+            delay: 0,
+            img: full_msg[1],
+            weblink: full_msg[2],
+            content : full_msg[0]
+        }).then( function(res) {
+            //receiveUserTextInput()
+        });
+    });
+
+//send message to user via bot ui
 socket.on('show_calendar_message', function(message) {
     botui.message
         .bot({

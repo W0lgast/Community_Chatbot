@@ -12,7 +12,7 @@ import socketio
 
 from util.message import message
 import util.utilities as ut
-from frontend.presentation import STANDARD_MSG, CALENDAR_MSG, GENRE_BTN_MSG
+from frontend.presentation import STANDARD_MSG, CALENDAR_MSG, GENRE_BTN_MSG, EVENT_MSG
 
 #------------------------------------------------------------------
 
@@ -58,6 +58,8 @@ async def sendClientMessage(sid, msg):
         await SOCKET_SERVER.emit('show_message', msgs[0], room=sid)
         for msg in msgs[1::]:
             await SOCKET_SERVER.emit('show_clickable_message', msg, room=sid)
+    elif message_type == EVENT_MSG:
+        await SOCKET_SERVER.emit('show_event_message', message_content, room=sid)
     else:
         message.logError("Unknown message type.",
                          "server_util::sendClientMessage")

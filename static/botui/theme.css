@@ -48,6 +48,17 @@ body {
     background-image: linear-gradient(to bottom, #1ca9e6 , #1ca9e6) !important;
 }
 
+.botui-message-content.event {
+
+    width: auto;
+    text-align: center;
+    border-style: solid;
+    border-width: 5px;
+    border-color: #0e5329;
+    box-shadow:0px 0px 0px 0 rgba(0,0,0,.25);
+    background-image: linear-gradient(to bottom, #1ce62d , #299c12) !important;
+}
+
 .botui-message-content.calendar {
 
     background-color:#ffffff;
@@ -64,6 +75,13 @@ body {
 
 }
 .botui-message.clickable {
+
+    align-self: center;
+    text-align: center;
+    align-items: center;
+}
+
+.botui-message.event {
 
     align-self: center;
     text-align: center;

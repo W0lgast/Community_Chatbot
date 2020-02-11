@@ -104,7 +104,7 @@
       template: `
                 <div class=\"botui botui-container\" v-botui-container>
                   <div class=\"botui-messages-container\">
-                    <div v-for=\"msg in messages\" :class=\"[\'botui-message\', \'msg.cssClass\', msg.type, {clicked: msg.clicked}]\" v-botui-scroll>
+                    <div v-for=\"msg in messages\" :class=\"[\'botui-message\', \'msg.cssClass\', msg.type, {clicked: msg.clicked}]\" v-botui-scroll v-on:click="clicked(msg)">
                       <transition name=\"slide-fade\">
                         <div v-if=\"msg.visible\">
                           <div v-if=\"msg.photo && !msg.loading\" :class=\"[\'profil\', {human: msg.human, \'agent\': !msg.human}]\"> 
@@ -124,7 +124,13 @@
                                 is-inline
                               />
                             </div>
-                            <div v-if=\"msg.type == \'clickable\'\" v-on:click="clicked(msg)">
+                            <div v-if=\"msg.type == \'event\'\">
+                              <span v-text=\"msg.content\" v-botui-markdown> 
+                              </span>
+                              <br />
+                              <img :src=\"msg.img\" alt="Event Image">
+                            </div>
+                            <div v-if=\"msg.type == \'clickable\'\">
                               <span v-if=\"msg.type == \'clickable\'\" v-text=\"msg.content\" v-botui-markdown>
                             </div>
                             <iframe v-if=\"msg.type == \'embed\'\" :src=\"msg.content\" frameborder=\"0\" allowfullscreen>
@@ -248,6 +254,10 @@
     	methods: {
         clicked: function(msg) {
 
+          if(msg.weblink) {
+            window.open(msg.weblink);
+          }
+
           if(msg.disabled) { return false }
           
           msg.clicked = !msg.clicked;
@@ -267,18 +277,12 @@
         },
 
     		handle_action_calendar_button: function (button) {
-          //console.log(this.selectedDate)
-          //console.log(this.selectedDate[0].toDateString())
-          //console.log(this.selectedDate[0].toUTCString())
-          console.log(this.selectedDate[0].toISOString())
-
           var ret = ""
           for (var i = 0; i < this.selectedDate.length; i++) {
             ret += this.selectedDate[i].toISOString().split("T")[0] + ", "
           }
           ret = ret.substring(0, ret.length - 2);
 
-          //console.log(this.selectedDate[0].toString())
           for (var i = 0; i < this.action.button.buttons.length; i++) {
             if(this.action.button.buttons[i].value == button.value && typeof(this.action.button.buttons[i].event) == 'function') {
               this.action.button.buttons[i].event(button);
@@ -295,11 +299,6 @@
           });
         },
         handle_action_confirm_clickable_button: function (button) {
-          //console.log(this.selectedDate)
-          //console.log(this.selectedDate[0].toDateString())
-          //console.log(this.selectedDate[0].toUTCString())
-          console.log(this.clicked_msgs)
-
           if(this.clicked_msgs.length == 0) { return false }
 
           var ret = ""
@@ -308,7 +307,6 @@
           }
           ret = ret.substring(0, ret.length - 2);
 
-          //console.log(this.selectedDate[0].toString())
           for (var i = 0; i < this.action.button.buttons.length; i++) {
             if(this.action.button.buttons[i].value == button.value && typeof(this.action.button.buttons[i].event) == 'function') {
               this.action.button.buttons[i].event(button);
@@ -447,6 +445,8 @@
 
       _msg.clicked = _msg.clicked || false;
       _msg.disabled = _msg.disabled || false;
+      _msg.img = _msg.img || false;
+      _msg.weblink = _msg.weblink || false;
       _msg.type = _msg.type || 'text';
       _msg.visible = (_msg.delay || _msg.loading) ? false : true;
       var _index = _instance.messages.push(_msg) - 1;

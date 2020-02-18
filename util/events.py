@@ -92,19 +92,24 @@ def getEventByID(id):
     str = response._content.decode()
     return ut.parseStr(str)
 
-def scrapeDescription(weblink):
+def scrapeDescription(weblink, headline):
     """
     Will scrape the full text description of the event from the given weblink.
 
     :param weblink: The ents24 web address of the event.
+    :param headline: The headline of the event, will become the first description.
     :return: The string description of the event.
     """
     response = r.get(weblink, headers=DEFAULT_HEADERS)
     websoup = BeautifulSoup(response.text, "html.parser")
-    tag = websoup.find(True, {"class":'fat-column'})
+    tag = websoup.find(True, {"class": 'fat-column'})
     desc_text_sections = [t for t in tag.find_all("p") if t not in \
                           tag.find_all("p", {"class": ["with-side-padding", "text-center", "text-dull"]})]
-    descs = [d_t.contents[0] for d_t in desc_text_sections if isinstance(d_t.contents[0], str)]
+    descs = [headline] + [d_t.contents[0] for d_t in desc_text_sections if isinstance(d_t.contents[0], str)]
+    ret = []
+    for d in descs:
+        #todo.. Make this a proper sentence splitter!
+        ret += d.split(".")
     return descs
 
 # -----------------------------------------------------------------------------------------

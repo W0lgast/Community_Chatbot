@@ -253,7 +253,6 @@
       },
     	methods: {
         clicked: function(msg) {
-          console.log(msg.type)
           if(msg.weblink) {
             window.open(msg.weblink);
           }
@@ -283,13 +282,9 @@
     		handle_action_calendar_button: function (button) {
           var ret = ""
           for (var i = 0; i < this.selectedDate.length; i++) {
-            //console.log(this.selectedDate[i].toString().substring(0,16))
-            //var dat_str = Date(this.selectedDate[i].toString().substring(0,16).toISOString()
             var dat = this.selectedDate[i]
             dat.setHours(12,0,0)
             var dat_str = dat.toISOString()
-            //var dat_str = this.selectedDate[i].toISOString()
-            console.log(dat_str)
             ret += dat_str.split("T")[0] + ", "
           }
           ret = ret.substring(0, ret.length - 2);
@@ -312,8 +307,6 @@
         handle_action_confirm_clickable_button: function (button) {
           if(this.clicked_msgs.length == 0) { return false }
 
-          console.log(this.clicked_msgs)
-
           var ret = ""
           for (var i = 0; i < this.clicked_msgs.length; i++) {
             if (this.clicked_msgs[i].content) {
@@ -321,7 +314,6 @@
             }
           }
           ret = ret.substring(0, ret.length - 2);
-          console.log(ret)
           for (var i = 0; i < this.action.button.buttons.length; i++) {
             if(this.action.button.buttons[i].value == button.value && typeof(this.action.button.buttons[i].event) == 'function') {
               this.action.button.buttons[i].event(button);

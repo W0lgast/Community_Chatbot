@@ -132,12 +132,15 @@ class CEventEngine(CAgent):
         for event in self._events_list:
             if WEBLINK_KEY in event.keys():
                 weblink = event[WEBLINK_KEY].replace("\\/", "/")
-                description = ents.scrapeDescription(weblink)
-                event["descriptions_embeddings_scores"] = [(d, nlp.embed(d)) for d in description]
-                event["descriptions_embeddings_scores"] = [(t[0], t[1], nlp.compare_embeddings(t[1], input_embedding))\
-                                                           for t in event["descriptions_embeddings_scores"]]
-                if len(event["descriptions_embeddings_scores"]) > 0:
-                    new_ents.append(event)
+                n_h = self._getNewHeadline(event)
+                if n_h is not None:
+                    description = ents.scrapeDescription(weblink,
+                                                         n_h)
+                    event["descriptions_embeddings_scores"] = [(d, nlp.embed(d)) for d in description]
+                    event["descriptions_embeddings_scores"] = [(t[0], t[1], nlp.compare_embeddings(t[1], input_embedding))\
+                                                               for t in event["descriptions_embeddings_scores"]]
+                    if len(event["descriptions_embeddings_scores"]) > 0:
+                        new_ents.append(event)
         self._events_list = new_ents
 
         # Compare all embeddings to input embedding, keep top in self._event_list
@@ -252,8 +255,6 @@ class CEventEngine(CAgent):
                          "CEventEngine::_debugInfo")
 
     def _make_event_message(self, event):
-        headline = event[HEADLINE_KEY]
-        title = event[TITLE_KEY]
         if IMAGE_KEY in event.keys():
             image_url = event[IMAGE_KEY][IMAGE_URL_KEY].replace("\\/", "/")
         else:
@@ -262,8 +263,17 @@ class CEventEngine(CAgent):
             weblink = event[WEBLINK_KEY].replace("\\/", "/")
         else:
             weblink = "_"
-        text = headline
-        if text is None: text = title
-        elif title is not None: text += ": " + title
+        text = self._getNewHeadline(event)
         text += "::" + image_url + "::" + weblink
         return text, EVENT_MSG
+
+    def _getNewHeadline(self, event):
+        headline = event[HEADLINE_KEY]
+        title = event[TITLE_KEY]
+        text = headline
+        if text is None:
+            text = title
+        elif title is not None:
+            if title != text:
+                text += ": " + title
+        return text

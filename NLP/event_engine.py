@@ -74,6 +74,13 @@ class CEventEngine(CAgent):
     # 'public' members
     # ------------------------------------------------------------------
 
+    def reset(self):
+        """
+        Resets the system.
+        """
+        self.__init__(self._max_events, self._name)
+        self._update = self._initial_message
+
     def process_input(self, input):
         """
         Will return an answer to the question given in input.
@@ -83,6 +90,10 @@ class CEventEngine(CAgent):
         if not isinstance(input, str):
             message.logError("Given input must be a string instance", "CQueryEngine::getAnswer")
             ut.exit(0)
+
+        if input == "\\reset":
+            self.reset()
+            return self._update
 
         if self._state == DATE_STATE:
             self._process_date_state(input)

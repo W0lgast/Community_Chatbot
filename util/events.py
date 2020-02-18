@@ -110,7 +110,8 @@ def scrapeDescription(weblink, headline):
     for d in descs:
         #todo.. Make this a proper sentence splitter!
         ret += d.split(".")
-    return descs
+    return ret
+    #return descs
 
 # -----------------------------------------------------------------------------------------
 # private functions

@@ -28,6 +28,7 @@ class CAgent(ABC):
             message.logError("Agents name is not a string instance.",
                              "CAgent::__init__")
             ut.exit(0)
+        self._name = name
         self._initial_message = [self._make_standard_message(INITIAL_MESSAGE)]
         self._most_recent_update = self._initial_message
         self._update = []
@@ -35,6 +36,12 @@ class CAgent(ABC):
     # ------------------------------------------------------------------
     # 'public' members
     # ------------------------------------------------------------------
+
+    def reset(self):
+        """
+        Resets the system.
+        """
+        self.__init__(self._name)
 
     @abstractmethod
     def process_input(self, input):

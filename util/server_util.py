@@ -66,7 +66,6 @@ async def sendClientMessage(sid, msg):
                          "server_util::sendClientMessage")
         ut.exit(0)
 
-
 async def sendClientsMessage(msg):
     """
     Sends a message to all connected clients.

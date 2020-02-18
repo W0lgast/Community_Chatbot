@@ -52,7 +52,7 @@ WEBLINK_KEY = "webLink"
 # -----------------------------------------------------------------------------------------
 
 def getEventsList(location="postcode:BS4 1NL",
-                  radius_distance=5,
+                  radius_distance=20,
                   date=None,
                   genre=None):
     if isinstance(genre, str):

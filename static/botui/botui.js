@@ -283,7 +283,14 @@
     		handle_action_calendar_button: function (button) {
           var ret = ""
           for (var i = 0; i < this.selectedDate.length; i++) {
-            ret += this.selectedDate[i].toISOString().split("T")[0] + ", "
+            //console.log(this.selectedDate[i].toString().substring(0,16))
+            //var dat_str = Date(this.selectedDate[i].toString().substring(0,16).toISOString()
+            var dat = this.selectedDate[i]
+            dat.setHours(12,0,0)
+            var dat_str = dat.toISOString()
+            //var dat_str = this.selectedDate[i].toISOString()
+            console.log(dat_str)
+            ret += dat_str.split("T")[0] + ", "
           }
           ret = ret.substring(0, ret.length - 2);
 

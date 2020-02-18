@@ -36,6 +36,7 @@ class CQueryEngine(CAgent):
             ut.exit(0)
         super(CQueryEngine, self).__init__(name)
         self._initial_message = [self._make_standard_message(INITIAL_MESSAGE)]
+        self._most_recent_update = self._initial_message
         self._predictor = Predictor.from_path(PREDICTOR_PATH)
         self._knowledge_base = knowledge_base
 

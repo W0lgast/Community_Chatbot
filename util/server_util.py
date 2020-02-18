@@ -17,7 +17,8 @@ from frontend.presentation import STANDARD_MSG, CALENDAR_MSG, GENRE_BTN_MSG, EVE
 #------------------------------------------------------------------
 
 SOCKET_SERVER = socketio.AsyncServer(async_handlers=True,
-                                     ping_timeout=200)
+                                     ping_timeout=200,
+                                     reconnection_delay=1)
 SERVER_APP = web.Application()
 SOCKET_SERVER.attach(SERVER_APP)
 

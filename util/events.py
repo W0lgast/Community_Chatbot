@@ -8,7 +8,7 @@ Kipp Freud
 # --------------------------------
 
 import requests as r
-import itertools as it
+from bs4 import BeautifulSoup
 
 import util.utilities as ut
 from util.message import message
@@ -33,6 +33,8 @@ response = r.post(AUTHORIZATION_URL,
                   data={'client_id': CLIENT_ID,
                         'client_secret': CLIENT_SECRET})
 AUTH_DICT = ut.parseStr(response._content.decode())
+
+DEFAULT_HEADERS = {'User-Agent':'Mozilla/5.0'}
 
 # --------------------------------
 
@@ -89,6 +91,21 @@ def getEventByID(id):
                      params={"id": id})
     str = response._content.decode()
     return ut.parseStr(str)
+
+def scrapeDescription(weblink):
+    """
+    Will scrape the full text description of the event from the given weblink.
+
+    :param weblink: The ents24 web address of the event.
+    :return: The string description of the event.
+    """
+    response = r.get(weblink, headers=DEFAULT_HEADERS)
+    websoup = BeautifulSoup(response.text, "html.parser")
+    tag = websoup.find(True, {"class":'fat-column'})
+    desc_text_sections = [t for t in tag.find_all("p") if t not in \
+                          tag.find_all("p", {"class": ["with-side-padding", "text-center", "text-dull"]})]
+    descs = [d_t.contents[0] for d_t in desc_text_sections if isinstance(d_t.contents[0], str)]
+    return descs
 
 # -----------------------------------------------------------------------------------------
 # private functions

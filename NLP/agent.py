@@ -29,6 +29,7 @@ class CAgent(ABC):
                              "CAgent::__init__")
             ut.exit(0)
         self._initial_message = [self._make_standard_message(INITIAL_MESSAGE)]
+        self._most_recent_update = self._initial_message
         self._update = []
 
     # ------------------------------------------------------------------
@@ -53,11 +54,15 @@ class CAgent(ABC):
         Also clears the update list.
         """
         ret = self._update
+        self._most_recent_update = ret
         self._update = []
         return ret
 
     def get_initial_message(self):
         return self._initial_message
+
+    def get_most_recent_message(self):
+        return self._most_recent_update
 
     # ------------------------------------------------------------------
     # 'private' members

@@ -253,9 +253,13 @@
       },
     	methods: {
         clicked: function(msg) {
-
+          console.log(msg.type)
           if(msg.weblink) {
             window.open(msg.weblink);
+          }
+          
+          if(msg.type != "clickable"){
+            return false
           }
 
           if(msg.disabled) { return false }
@@ -290,7 +294,7 @@
               break;
             }
           }
-
+          
           _handleAction(ret);
 
           _actionResolve({
@@ -301,12 +305,16 @@
         handle_action_confirm_clickable_button: function (button) {
           if(this.clicked_msgs.length == 0) { return false }
 
+          console.log(this.clicked_msgs)
+
           var ret = ""
           for (var i = 0; i < this.clicked_msgs.length; i++) {
-            ret += this.clicked_msgs[i].content + ", "
+            if (this.clicked_msgs[i].content) {
+              ret += this.clicked_msgs[i].content + ", "
+            }
           }
           ret = ret.substring(0, ret.length - 2);
-
+          console.log(ret)
           for (var i = 0; i < this.action.button.buttons.length; i++) {
             if(this.action.button.buttons[i].value == button.value && typeof(this.action.button.buttons[i].event) == 'function') {
               this.action.button.buttons[i].event(button);

@@ -1,5 +1,22 @@
+var BIG_SID = false;
+
 //setup the websocket
-var socket = io.connect();
+var socket = io.connect( {
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: Infinity
+    }
+);
+
+socket.on( 'connect', function () {
+    console.log( 'Connected to server' );
+} );
+
+socket.on( 'disconnect', function () {
+    console.log( 'Disconnected to server' );
+} );
+
 
 //setup the bot ui
 var botui = new BotUI('client_bot_ui'),

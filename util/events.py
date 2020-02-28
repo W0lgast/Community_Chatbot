@@ -22,7 +22,11 @@ GENRE_SYNONYMS = {
     "Comedy": ["comedy"],
     "Theatre": ["theatreandarts", "play", "opera", "musical", "panto", "ballet", "ballroom", "westend"],
     "Shows & Events": ["adult", "cabaret", "showsandevents", "talk", "family", "circus", "magic", "poetry",
-                       "sports", "tv", "online", "kids"]}
+                       "sports", "tv", "online", "kids"],
+    "Exercise": [],
+    "Outdoors": [],
+    "Cafe": []
+}
 
 # --------------------------------
 
@@ -44,6 +48,7 @@ TITLE_KEY = "title"
 IMAGE_KEY = "image"
 IMAGE_URL_KEY = "url"
 WEBLINK_KEY = "webLink"
+ENTS_PATH = 'https://api.ents24.com/event/list'
 
 # -----------------------------------------------------------------------------------------
 # public functions
@@ -132,7 +137,7 @@ def _getEvents(params):
     while True:
         if resp is not None:
             params["page"] = resp.headers._store["x-next-page"][1]
-        resp = r.get('https://api.ents24.com/event/list',
+        resp = r.get(ENTS_PATH,
                      headers={"Authorization": AUTH_DICT["access_token"]},
                      params=params)
         if resp.status_code not in [200, 204]:

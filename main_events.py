@@ -9,16 +9,9 @@ Kipp Freud
 
 from util.message import message
 import util.utilities as ut
-from knowledge.knowledge_base import CKnowledgeBase
-from frontend.web_frontend import CWebFrontend
-from NLP.query_engine import CQueryEngine
 from NLP.event_engine import CEventEngine
 from frontend.terminal_frontend import CTerminalFrontend
 from frontend.botui_frontend import CBotUIFrontend
-
-#------------------------------------------------------------------
-
-PATH_TO_DATA = "data/data.csv"
 
 #------------------------------------------------------------------
 

@@ -23,9 +23,11 @@ GENRE_SYNONYMS = {
     "Theatre": ["theatreandarts", "play", "opera", "musical", "panto", "ballet", "ballroom", "westend"],
     "Shows & Events": ["adult", "cabaret", "showsandevents", "talk", "family", "circus", "magic", "poetry",
                        "sports", "tv", "online", "kids"],
-    "Exercise": [],
-    "Outdoors": [],
-    "Cafe": []
+    "Exercise": ["exercise", "erercize"],
+    "Outdoors": ["outdoors"],
+    "Cafe": ["cafe"],
+    "Cooking": ["cooking"],
+    "Art": ["art"]
 }
 
 # --------------------------------
@@ -87,6 +89,7 @@ def getEventsList(location="postcode:BS4 1NL",
                 all_events.append(ev)
                 all_ids.append(ev["id"])
     return all_events
+
 
 def getEventByID(id):
     response = r.get('https://api.ents24.com/event/read',

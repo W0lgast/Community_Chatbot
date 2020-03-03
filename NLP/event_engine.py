@@ -14,11 +14,15 @@ from util.events import GENRE_SYNONYMS, START_DATE, END_DATE, GENRE_KEY, HEADLIN
 from util.events import TITLE_KEY, IMAGE_KEY, IMAGE_URL_KEY, WEBLINK_KEY
 from NLP.agent import CAgent
 from frontend.presentation import STANDARD_MSG, CALENDAR_MSG, GENRE_BTN_MSG, EVENT_MSG
+from data import expand_recurring_events as hardcoded
 
 # ------------------------------------------------------------------
 
-MAIN_GENRES = list(GENRE_SYNONYMS.keys())
+# Generate the next month's events from the handcoded timetable
+recurring_events = hardcoded.get_all_recurrers(days=30)
+MAX_TO_DISPLAY = 6
 
+MAIN_GENRES = list(GENRE_SYNONYMS.keys())
 INITIAL_MESSAGE = "Let's find an event for you!"
 DATE_FOUND_MESSAGE = "Got it, thanks!"
 GENRE_FOUND_MESSAGE = "Great choice!"
@@ -26,7 +30,7 @@ DATE_STATE_INITIAL = "Which dates are you interested in?"
 GENRE_STATE_INITIAL = "What kind of events are you interested in?:" + ":".join(MAIN_GENRES)
 DESIRED_EVENT_INFO_INITIAL = "Tell me a bit about your dream event."
 PRESENT_EVENTS_INITIAL = "We think you'll love these events:"
-EMPTY_EVENTS_MESSAGE = "Ah, sorry, couldn't find anything for that category."
+EMPTY_EVENTS_MESSAGE = "Ah, sorry, couldn't find anything for that category, then."
 
 # ------------------------------------------------------------------
 
@@ -36,10 +40,10 @@ DESIRED_EVENT_INFO = "DESIRED_EVENT_INFO"
 PRESENT_EVENTS = "PRESENT_EVENTS"
 EMPTY_STATE = "EMPTY_STATE"
 
+# Order of operations if all goes well
 # State path MUST end with PRESENT_EVENTS.
 STATE_PATH = [DATE_STATE,
               GENRE_STATE,
-              EMPTY_STATE,
               #DESIRED_EVENT_INFO,
               PRESENT_EVENTS]
 
@@ -57,7 +61,7 @@ class CEventEngine(CAgent):
     """
     This is a class for answering generic questions using some database.
     """
-    def __init__(self, max_events=3, name="Event Engine"):
+    def __init__(self, max_events=MAX_TO_DISPLAY, name="Event Engine"):
         super(CEventEngine, self).__init__(name)
         if not isinstance(max_events, int):
             message.logError("Max events must be an int.", "CEventsEngine::__init__")
@@ -66,7 +70,9 @@ class CEventEngine(CAgent):
         self._state_index = 0
         self._state = STATE_PATH[0]
         self._initial_message.append(STATE_INITIAL_MESSAGES[self._state])
-        self._events_list = ents.getEventsList()
+
+        events_from_ents = ents.getEventsList()
+        self._events_list = ut.merge_events(events_from_ents, recurring_events)
         self._max_events = max_events
         self._debugInfo()
 
@@ -132,14 +138,17 @@ class CEventEngine(CAgent):
         Presents selected events to the user.
         """
         if len(self._events_list) == 0:
-            return self._update.append(STATE_INITIAL_MESSAGES[EMPTY_STATE])
+            self._update.append(STATE_INITIAL_MESSAGES[EMPTY_STATE])
+            return self._update
 
-        if len(self._events_list) <= 3:
+        if len(self._events_list) <= MAX_TO_DISPLAY :
             events_to_present = self._events_list
         else:
             events_to_present = ut.randomSample(self._events_list, self._max_events)
+
         for event in events_to_present:
             self._update.append(self._make_event_message(event))
+
         return self._update
 
     def _process_genre_state(self, input):
@@ -163,9 +172,10 @@ class CEventEngine(CAgent):
 
     def _resetEvents(self):
         """
-        Resets :param:`_events_dict`.
+        Resets :param:`_events_list`.
         """
-        self._events_dict = ents.getEventsList()
+        events_from_ents = ents.getEventsList()
+        self._events_list = ut.merge_events(events_from_ents, recurring_events)
 
     def _restrictEventsListByGenre(self, genres):
         """
@@ -184,11 +194,12 @@ class CEventEngine(CAgent):
                                  "CEventEngine::_restrictEventsListByGenre")
                 ut.exit(0)
             ok_genres += GENRE_SYNONYMS[genre]
+
         new_ents = []
         for ent in self._events_list:
             if GENRE_KEY in ent.keys():
                 for genre in ent[GENRE_KEY]:
-                    if genre in ok_genres:
+                    if genre.lower() in ok_genres:
                         new_ents.append(ent)
                         break
         self._events_list = new_ents

@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# ------------------------------------------------------------------
+
 import pandas as pd
 import datetime
+import sys
+sys.path.append('..')
+pd.options.mode.chained_assignment = None
 
+import util.utilities as ut
+
+# ------------------------------------------------------------------
 
 NOW = datetime.date.today()
-PATH = "recurring_events.csv"
+ROOT = ut.get_project_root()
+PATH = ROOT / "data/recurring_events.csv"
 extra_cols = ["DayOfWeek", "WeekOfMonth", "Recurring"]
 
 
@@ -77,4 +86,4 @@ def get_all_recurrers(days=60) :
 
 if __name__ == "__main__":
     events = get_all_recurrers()
-    events.to_csv("expanded_events.csv")
+    events.to_csv("expanded_events.csv", index=False)

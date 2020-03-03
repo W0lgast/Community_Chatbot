@@ -15,18 +15,10 @@ import util.events as ents
 import requests as r
 from ast import literal_eval as lit
 import ast
+import util.nlp_util as nlp
 
 # --------------------------------
 
+vector = nlp.embed("I love to do sentence embeddings!")  # 300-dim vector
 
-
-events = ents.getEventsList(location="postcode:BS9 4EX",
-                            radius_distance=10)
-genres = []
-for event in events:
-    genres += event['genre']
-genres = list(set(genres))
-
-for genre in genres:
-    message.logDebug(genre)
-message.logDebug("Exiting successfully")
+ut.exit(1)

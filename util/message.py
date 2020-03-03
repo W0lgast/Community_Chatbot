@@ -69,7 +69,6 @@ class CMessage(object):
         '''
         strm = str(method)
         tt = time_taken * 1000
-        message.logDebug('{0}  {1:.2f} ms'.format(strm, tt), "CMessage::timeit")
         if strm not in self.timing: self.timing[strm] = [tt]
         else: self.timing[strm].append(tt)
 

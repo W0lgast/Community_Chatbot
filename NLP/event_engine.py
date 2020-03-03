@@ -10,6 +10,7 @@ Kipp Freud
 from util.message import message
 import util.utilities as ut
 import util.events as ents
+import util.nlp_util as nlp
 from util.events import GENRE_SYNONYMS, START_DATE, END_DATE, GENRE_KEY, HEADLINE_KEY
 from util.events import TITLE_KEY, IMAGE_KEY, IMAGE_URL_KEY, WEBLINK_KEY
 from NLP.agent import CAgent
@@ -26,9 +27,11 @@ MAIN_GENRES = list(GENRE_SYNONYMS.keys())
 INITIAL_MESSAGE = "Let's find an event for you!"
 DATE_FOUND_MESSAGE = "Got it, thanks!"
 GENRE_FOUND_MESSAGE = "Great choice!"
+DESIRED_EVENT_FOUND_MESSAGE = "I've had a look through all events to find those which best match your description."
 DATE_STATE_INITIAL = "Which dates are you interested in?"
 GENRE_STATE_INITIAL = "What kind of events are you interested in?:" + ":".join(MAIN_GENRES)
 DESIRED_EVENT_INFO_INITIAL = "Tell me a bit about your dream event."
+
 PRESENT_EVENTS_INITIAL = "We think you'll love these events:"
 EMPTY_EVENTS_MESSAGE = "Ah, sorry, couldn't find anything for that category, then."
 
@@ -44,7 +47,7 @@ EMPTY_STATE = "EMPTY_STATE"
 # State path MUST end with PRESENT_EVENTS.
 STATE_PATH = [DATE_STATE,
               GENRE_STATE,
-              #DESIRED_EVENT_INFO,
+              DESIRED_EVENT_INFO,
               PRESENT_EVENTS]
 
 STATE_INITIAL_MESSAGES = {
@@ -67,6 +70,7 @@ class CEventEngine(CAgent):
             message.logError("Max events must be an int.", "CEventsEngine::__init__")
             ut.exit(0)
         self._initial_message = [self._make_standard_message(INITIAL_MESSAGE)]
+        self._most_recent_update = self._initial_message
         self._state_index = 0
         self._state = STATE_PATH[0]
         self._initial_message.append(STATE_INITIAL_MESSAGES[self._state])
@@ -80,6 +84,13 @@ class CEventEngine(CAgent):
     # 'public' members
     # ------------------------------------------------------------------
 
+    def reset(self):
+        """
+        Resets the system.
+        """
+        self.__init__(self._max_events, self._name)
+        self._update = self._initial_message
+
     def process_input(self, input):
         """
         Will return an answer to the question given in input.
@@ -89,6 +100,10 @@ class CEventEngine(CAgent):
         if not isinstance(input, str):
             message.logError("Given input must be a string instance", "CQueryEngine::getAnswer")
             ut.exit(0)
+
+        if input == "\\reset":
+            self.reset()
+            return self._update
 
         if self._state == DATE_STATE:
             self._process_date_state(input)
@@ -131,7 +146,38 @@ class CEventEngine(CAgent):
 
         :return: tuple response to input.
         """
-        ut.exit(0)
+        # Embed the input
+        input_embedding = nlp.embed(input)
+        # Scrape descriptions for all events and find embeddings for them.
+        new_ents = []
+        for event in self._events_list:
+            if WEBLINK_KEY in event.keys():
+                weblink = event[WEBLINK_KEY].replace("\\/", "/")
+                n_h = self._getNewHeadline(event)
+                if n_h is not None:
+                    description = ents.scrapeDescription(weblink,
+                                                         n_h)
+                    event["descriptions_embeddings_scores"] = [(d, nlp.embed(d)) for d in description]
+                    event["descriptions_embeddings_scores"] = [(t[0], t[1], nlp.compare_embeddings(t[1], input_embedding))\
+                                                               for t in event["descriptions_embeddings_scores"]]
+                    if len(event["descriptions_embeddings_scores"]) > 0:
+                        new_ents.append(event)
+        self._events_list = new_ents
+
+        # Compare all embeddings to input embedding, keep top in self._event_list
+        for event in self._events_list:
+            all_scores = [e[2] for e in event["descriptions_embeddings_scores"]]
+            for d, _, s in event["descriptions_embeddings_scores"]:
+                if s == min(all_scores):
+                    event["best_scoring_description"] = (d, s)
+        self._events_list = sorted(self._events_list,
+                                   key=lambda x: min([e[2] for e in x["descriptions_embeddings_scores"]]))
+        self._events_list = self._events_list[0:self._max_events]
+        for i, event in enumerate(self._events_list):
+            message.logDebug("Best description " + str(i) + ": " + event["best_scoring_description"][0],
+                             "CEventsEngine::_process_desired_event_info")
+        self._update.append(self._make_standard_message(DESIRED_EVENT_FOUND_MESSAGE))
+        self._transition_states()
 
     def _present_events(self):
         """
@@ -234,8 +280,6 @@ class CEventEngine(CAgent):
                          "CEventEngine::_debugInfo")
 
     def _make_event_message(self, event):
-        headline = event[HEADLINE_KEY]
-        title = event[TITLE_KEY]
         if IMAGE_KEY in event.keys():
             image_url = event[IMAGE_KEY][IMAGE_URL_KEY].replace("\\/", "/")
         else:
@@ -244,8 +288,17 @@ class CEventEngine(CAgent):
             weblink = event[WEBLINK_KEY].replace("\\/", "/")
         else:
             weblink = "_"
-        text = headline
-        if text is None: text = title
-        elif title is not None: text += ": " + title
+        text = self._getNewHeadline(event)
         text += "::" + image_url + "::" + weblink
-        return (text, EVENT_MSG)
+        return text, EVENT_MSG
+
+    def _getNewHeadline(self, event):
+        headline = event[HEADLINE_KEY]
+        title = event[TITLE_KEY]
+        text = headline
+        if text is None:
+            text = title
+        elif title is not None:
+            if title != text:
+                text += ": " + title
+        return text

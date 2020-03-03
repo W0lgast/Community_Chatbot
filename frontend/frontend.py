@@ -35,5 +35,8 @@ class CFrontend(ABC):
                          "CFrontend::sendMessage")
         ut.exit(0)
 
+    def get_most_recent_message(self):
+        return self._agent.get_most_recent_message()
+
     def get_initial_message(self):
         return self._agent.get_initial_message()

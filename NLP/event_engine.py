@@ -26,6 +26,7 @@ DATE_STATE_INITIAL = "Which dates are you interested in?"
 GENRE_STATE_INITIAL = "What kind of events are you interested in?:" + ":".join(MAIN_GENRES)
 DESIRED_EVENT_INFO_INITIAL = "Tell me a bit about your dream event."
 PRESENT_EVENTS_INITIAL = "We think you'll love these events:"
+EMPTY_EVENTS_MESSAGE = "Ah, sorry, couldn't find anything for that category."
 
 # ------------------------------------------------------------------
 
@@ -33,16 +34,19 @@ DATE_STATE = "DATE_STATE"
 GENRE_STATE = "GENRE_STATE"
 DESIRED_EVENT_INFO = "DESIRED_EVENT_INFO"
 PRESENT_EVENTS = "PRESENT_EVENTS"
+EMPTY_STATE = "EMPTY_STATE"
 
 # State path MUST end with PRESENT_EVENTS.
 STATE_PATH = [DATE_STATE,
               GENRE_STATE,
+              EMPTY_STATE,
               #DESIRED_EVENT_INFO,
               PRESENT_EVENTS]
 
 STATE_INITIAL_MESSAGES = {
     DATE_STATE: (DATE_STATE_INITIAL, CALENDAR_MSG),
     GENRE_STATE: (GENRE_STATE_INITIAL, GENRE_BTN_MSG),
+    EMPTY_STATE: (EMPTY_EVENTS_MESSAGE, STANDARD_MSG),
     DESIRED_EVENT_INFO: (DESIRED_EVENT_INFO_INITIAL, STANDARD_MSG),
     PRESENT_EVENTS: (PRESENT_EVENTS_INITIAL, STANDARD_MSG)
 }
@@ -128,9 +132,8 @@ class CEventEngine(CAgent):
         Presents selected events to the user.
         """
         if len(self._events_list) == 0:
-            message.logError("There aren't any events to present, this function shouldn't have been called."
-                             "CEventEngine::_present_events")
-            ut.exit(0)
+            return self._update.append(STATE_INITIAL_MESSAGES[EMPTY_STATE])
+
         if len(self._events_list) <= 3:
             events_to_present = self._events_list
         else:

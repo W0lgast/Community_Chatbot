@@ -11,7 +11,7 @@ from util.message import message
 import util.utilities as ut
 import util.events as ents
 import util.nlp_util as nlp
-from util.events import GENRE_SYNONYMS, START_DATE, END_DATE, GENRE_KEY, HEADLINE_KE
+from util.events import GENRE_SYNONYMS, START_DATE, END_DATE, GENRE_KEY, HEADLINE_KEY
 from util.events import TITLE_KEY, IMAGE_KEY, IMAGE_URL_KEY, WEBLINK_KEY
 from NLP.agent import CAgent
 from frontend.presentation import STANDARD_MSG, CALENDAR_MSG, GENRE_BTN_MSG, EVENT_MSG

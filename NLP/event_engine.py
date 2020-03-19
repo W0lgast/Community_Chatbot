@@ -11,13 +11,17 @@ from util.message import message
 import util.utilities as ut
 import util.events as ents
 import util.nlp_util as nlp
-from util.events import GENRE_SYNONYMS, START_DATE, END_DATE, GENRE_KEY, HEADLINE_KEY
+from util.events import GENRE_SYNONYMS, START_DATE, END_DATE, GENRE_KEY, HEADLINE_KE
 from util.events import TITLE_KEY, IMAGE_KEY, IMAGE_URL_KEY, WEBLINK_KEY
 from NLP.agent import CAgent
 from frontend.presentation import STANDARD_MSG, CALENDAR_MSG, GENRE_BTN_MSG, EVENT_MSG
 from data import expand_recurring_events as hardcoded
 
 # ------------------------------------------------------------------
+
+USE_PREPROCESSED = True
+#PREPROCESSED_FILE_PATH = "preprocessed_ents_full.pkl"
+PREPROCESSED_FILE_PATH = "preprocessed_ents_knowle.pkl"
 
 # Generate the next month's events from the handcoded timetable
 recurring_events = hardcoded.get_all_recurrers(days=30)
@@ -75,8 +79,11 @@ class CEventEngine(CAgent):
         self._state = STATE_PATH[0]
         self._initial_message.append(STATE_INITIAL_MESSAGES[self._state])
 
-        events_from_ents = ents.getEventsList()
-        self._events_list = ut.merge_events(events_from_ents, recurring_events)
+        if USE_PREPROCESSED:
+            self._events_list = ut.load(PREPROCESSED_FILE_PATH)
+        else:
+            events_from_ents = ents.getEventsList()
+            self._events_list = ut.merge_events(events_from_ents, recurring_events)
         self._max_events = max_events
         self._debugInfo()
 
@@ -146,22 +153,37 @@ class CEventEngine(CAgent):
 
         :return: tuple response to input.
         """
+        #remove dupes
+        aux = []
+        for e in self._events_list:
+            if e[HEADLINE_KEY] not in [A[HEADLINE_KEY] for A in aux]:
+                aux.append(e)
+        self._events_list = aux
         # Embed the input
         input_embedding = nlp.embed(input)
         # Scrape descriptions for all events and find embeddings for them.
         new_ents = []
         for event in self._events_list:
-            if WEBLINK_KEY in event.keys():
-                weblink = event[WEBLINK_KEY].replace("\\/", "/")
-                n_h = self._getNewHeadline(event)
-                if n_h is not None:
-                    description = ents.scrapeDescription(weblink,
-                                                         n_h)
-                    event["descriptions_embeddings_scores"] = [(d, nlp.embed(d)) for d in description]
-                    event["descriptions_embeddings_scores"] = [(t[0], t[1], nlp.compare_embeddings(t[1], input_embedding))\
-                                                               for t in event["descriptions_embeddings_scores"]]
-                    if len(event["descriptions_embeddings_scores"]) > 0:
-                        new_ents.append(event)
+            if "descriptions_embeddings" in event.keys():
+                event["descriptions_embeddings_scores"] = [(t[0], t[1], nlp.compare_embeddings(t[1], input_embedding)) \
+                                                           for t in event["descriptions_embeddings"]]
+                if len(event["descriptions_embeddings_scores"]) > 0:
+                    new_ents.append(event)
+            else:
+                if WEBLINK_KEY in event.keys():
+                    weblink = event[WEBLINK_KEY].replace("\\/", "/")
+                    n_h = self._getNewHeadline(event)
+                    if n_h is not None:
+                        try:
+                            description = ents.scrapeDescription(weblink,
+                                                                 n_h)
+                        except:
+                            description = [event[HEADLINE_KEY]]
+                        event["descriptions_embeddings_scores"] = [(d, nlp.embed(d)) for d in description]
+                        event["descriptions_embeddings_scores"] = [(t[0], t[1], nlp.compare_embeddings(t[1], input_embedding))\
+                                                                   for t in event["descriptions_embeddings_scores"]]
+                        if len(event["descriptions_embeddings_scores"]) > 0:
+                            new_ents.append(event)
         self._events_list = new_ents
 
         # Compare all embeddings to input embedding, keep top in self._event_list
@@ -190,7 +212,7 @@ class CEventEngine(CAgent):
         if len(self._events_list) <= MAX_TO_DISPLAY :
             events_to_present = self._events_list
         else:
-            events_to_present = ut.randomSample(self._events_list, self._max_events)
+            events_to_present = self._events_list[0:self._max_events]
 
         for event in events_to_present:
             self._update.append(self._make_event_message(event))
@@ -214,7 +236,8 @@ class CEventEngine(CAgent):
 
         :return: tuple response to input.
         """
-        ut.exit(0)
+        self.reset()
+        #ut.exit(0)
 
     def _resetEvents(self):
         """
@@ -285,7 +308,10 @@ class CEventEngine(CAgent):
         else:
             image_url = "_"
         if WEBLINK_KEY in event.keys():
-            weblink = event[WEBLINK_KEY].replace("\\/", "/")
+            try:
+                weblink = event[WEBLINK_KEY].replace("\\/", "/")
+            except:
+                weblink = "_"
         else:
             weblink = "_"
         text = self._getNewHeadline(event)

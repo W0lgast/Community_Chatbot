@@ -14,6 +14,7 @@ from ast import literal_eval as lit
 import random
 from pathlib import Path
 import pandas as pd
+import pickle as pkl
 
 from util.message import message
 
@@ -43,6 +44,21 @@ def exit(code):
     else:
         message.logError('Exiting program with unknown error status ('+str(code)+')')
     sys.exit()
+
+#-----------------------------------------------------------------------------------------
+# pickle functions
+#-----------------------------------------------------------------------------------------
+
+def save(save_this, file_name):
+    output = open(file_name, 'wb')
+    pkl.dump(save_this, output)
+    output.close()
+
+def load(file_name):
+    pkl_file = open(file_name, 'rb')
+    obj = pkl.load(pkl_file)
+    pkl_file.close()
+    return obj
 
 #-----------------------------------------------------------------------------------------
 # timing functions

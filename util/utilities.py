@@ -12,12 +12,15 @@ from math import sqrt
 import sys
 from ast import literal_eval as lit
 import random
+from pathlib import Path
+import pandas as pd
+import pickle as pkl
 
 from util.message import message
 
 #------------------------------------------------------------------
 
-TIMING_INFO = False
+TIMING_INFO = True
 
 #------------------------------------------------------------------
 
@@ -41,6 +44,21 @@ def exit(code):
     else:
         message.logError('Exiting program with unknown error status ('+str(code)+')')
     sys.exit()
+
+#-----------------------------------------------------------------------------------------
+# pickle functions
+#-----------------------------------------------------------------------------------------
+
+def save(save_this, file_name):
+    output = open(file_name, 'wb')
+    pkl.dump(save_this, output)
+    output.close()
+
+def load(file_name):
+    pkl_file = open(file_name, 'rb')
+    obj = pkl.load(pkl_file)
+    pkl_file.close()
+    return obj
 
 #-----------------------------------------------------------------------------------------
 # timing functions
@@ -152,3 +170,33 @@ def _dateCheck(date_1, date_2):
     return True
 
 
+def merge_events(api_events: list, pd_events: pd.DataFrame) :
+    # I don't know why this is necessary
+    pd_events.to_csv("expanded_events.csv", index=False)
+    pd_events = pd.read_csv("expanded_events.csv")
+    pd_events = pd_events.rename(columns={"Date": "startDate", \
+                                            "TimeStart": "startTimeString", \
+                                            "TimeEnd": "endTimeString", \
+                                            "Description": "description", \
+                                            "Category": "genre", \
+                                            "Title": "title", \
+                                            "Location": "venue", \
+                                            "URL": "webLink"
+                                          })
+    pd_events['headline'] = pd_events['title']
+    pd_events['startDate'] = pd.to_datetime(pd_events['startDate'])
+    pd_events['startDate'] = pd_events['startDate'].dt.strftime('%Y-%m-%d')
+    pd_events["endDate"] = pd_events["startDate"]
+    pd_events["image"] = "https://theparkcentre.org.uk/wp/wp-content/uploads/2017/07/cropped-logo-small-1.png"
+    hardcoded_list_of_dicts = list( pd_events.T.to_dict().values() )
+
+    for event in hardcoded_list_of_dicts :
+        event["genre"] = [event["genre"]]
+        event["image"] = {"url": event["image"]}
+
+    return api_events + hardcoded_list_of_dicts
+
+
+def get_project_root() -> Path:
+    """Returns project root folder."""
+    return Path(__file__).parent.parent

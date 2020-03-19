@@ -253,9 +253,12 @@
       },
     	methods: {
         clicked: function(msg) {
-
           if(msg.weblink) {
             window.open(msg.weblink);
+          }
+          
+          if(msg.type != "clickable"){
+            return false
           }
 
           if(msg.disabled) { return false }
@@ -279,7 +282,10 @@
     		handle_action_calendar_button: function (button) {
           var ret = ""
           for (var i = 0; i < this.selectedDate.length; i++) {
-            ret += this.selectedDate[i].toISOString().split("T")[0] + ", "
+            var dat = this.selectedDate[i]
+            dat.setHours(12,0,0)
+            var dat_str = dat.toISOString()
+            ret += dat_str.split("T")[0] + ", "
           }
           ret = ret.substring(0, ret.length - 2);
 
@@ -290,7 +296,7 @@
               break;
             }
           }
-
+          
           _handleAction(ret);
 
           _actionResolve({
@@ -303,10 +309,11 @@
 
           var ret = ""
           for (var i = 0; i < this.clicked_msgs.length; i++) {
-            ret += this.clicked_msgs[i].content + ", "
+            if (this.clicked_msgs[i].content) {
+              ret += this.clicked_msgs[i].content + ", "
+            }
           }
           ret = ret.substring(0, ret.length - 2);
-
           for (var i = 0; i < this.action.button.buttons.length; i++) {
             if(this.action.button.buttons[i].value == button.value && typeof(this.action.button.buttons[i].event) == 'function') {
               this.action.button.buttons[i].event(button);

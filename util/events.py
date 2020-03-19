@@ -8,7 +8,7 @@ Kipp Freud
 # --------------------------------
 
 import requests as r
-import itertools as it
+from bs4 import BeautifulSoup
 
 import util.utilities as ut
 from util.message import message
@@ -22,7 +22,13 @@ GENRE_SYNONYMS = {
     "Comedy": ["comedy"],
     "Theatre": ["theatreandarts", "play", "opera", "musical", "panto", "ballet", "ballroom", "westend"],
     "Shows & Events": ["adult", "cabaret", "showsandevents", "talk", "family", "circus", "magic", "poetry",
-                       "sports", "tv", "online", "kids"]}
+                       "sports", "tv", "online", "kids"],
+    "Exercise": ["exercise", "erercize"],
+    "Outdoors": ["outdoors"],
+    "Cafe": ["cafe"],
+    "Cooking": ["cooking"],
+    "Art": ["art"]
+}
 
 # --------------------------------
 
@@ -34,6 +40,8 @@ response = r.post(AUTHORIZATION_URL,
                         'client_secret': CLIENT_SECRET})
 AUTH_DICT = ut.parseStr(response._content.decode())
 
+DEFAULT_HEADERS = {'User-Agent':'Mozilla/5.0'}
+
 # --------------------------------
 
 START_DATE = "startDate"
@@ -44,13 +52,14 @@ TITLE_KEY = "title"
 IMAGE_KEY = "image"
 IMAGE_URL_KEY = "url"
 WEBLINK_KEY = "webLink"
+ENTS_PATH = 'https://api.ents24.com/event/list'
 
 # -----------------------------------------------------------------------------------------
 # public functions
 # -----------------------------------------------------------------------------------------
 
 def getEventsList(location="postcode:BS4 1NL",
-                  radius_distance=5,
+                  radius_distance=20,
                   date=None,
                   genre=None):
     if isinstance(genre, str):
@@ -83,12 +92,34 @@ def getEventsList(location="postcode:BS4 1NL",
                 all_ids.append(ev["id"])
     return all_events
 
+
 def getEventByID(id):
     response = r.get('https://api.ents24.com/event/read',
                      headers={"Authorization": AUTH_DICT["access_token"]},
                      params={"id": id})
     str = response._content.decode()
     return ut.parseStr(str)
+
+def scrapeDescription(weblink, headline):
+    """
+    Will scrape the full text description of the event from the given weblink.
+
+    :param weblink: The ents24 web address of the event.
+    :param headline: The headline of the event, will become the first description.
+    :return: The string description of the event.
+    """
+    response = r.get(weblink, headers=DEFAULT_HEADERS)
+    websoup = BeautifulSoup(response.text, "html.parser")
+    tag = websoup.find(True, {"class": 'fat-column'})
+    desc_text_sections = [t for t in tag.find_all("p") if t not in \
+                          tag.find_all("p", {"class": ["with-side-padding", "text-center", "text-dull"]})]
+    descs = [headline] + [d_t.contents[0] for d_t in desc_text_sections if isinstance(d_t.contents[0], str)]
+    ret = []
+    for d in descs:
+        #todo.. Make this a proper sentence splitter!
+        ret += d.split(".")
+    return ret
+    #return descs
 
 # -----------------------------------------------------------------------------------------
 # private functions
@@ -132,7 +163,7 @@ def _getEvents(params):
     while True:
         if resp is not None:
             params["page"] = resp.headers._store["x-next-page"][1]
-        resp = r.get('https://api.ents24.com/event/list',
+        resp = r.get(ENTS_PATH,
                      headers={"Authorization": AUTH_DICT["access_token"]},
                      params=params)
         if resp.status_code not in [200, 204]:

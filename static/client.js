@@ -1,5 +1,22 @@
+var BIG_SID = false;
+
 //setup the websocket
-var socket = io.connect();
+var socket = io.connect( {
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: Infinity
+    }
+);
+
+socket.on( 'connect', function () {
+    console.log( 'Connected to server' );
+} );
+
+socket.on( 'disconnect', function () {
+    console.log( 'Disconnected to server' );
+} );
+
 
 //setup the bot ui
 var botui = new BotUI('client_bot_ui'),
@@ -105,6 +122,13 @@ var receiveUserConfirmClickableButtonInput = function () {
       }).then( function(res) {
         //get the input value
         var message = res.value;
+        console.log(message.substring(0, 5))
+        console.log(message.length)
+        if (message.length >= 5 && message.substring(0, 5) == "NONE,") {
+            console.log(message)
+            message = message.slice(6)
+            console.log(message)
+        }
         //send message via socket to server
         socket.emit('message', message)
     });

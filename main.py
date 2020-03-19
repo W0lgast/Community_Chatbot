@@ -16,7 +16,7 @@ from frontend.terminal_frontend import CTerminalFrontend
 
 #------------------------------------------------------------------
 
-PATH_TO_DATA = "data/data.csv"
+PATH_TO_DATA = "data/history_data.csv"
 
 #------------------------------------------------------------------
 

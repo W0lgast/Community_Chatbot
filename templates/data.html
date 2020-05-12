@@ -7,8 +7,13 @@
 <body>
 
 <form method="POST" action="/">
-    {{ form.name.label }} {{ form.name(size=20) }}
-    <input type="submit" value="Go">
+    {{ form.title.label }} {{ form.title }}<br>
+    {{ form.date.label }}  {{ form.date }}<br>
+    {{ form.url.label }}  {{ form.url }}<br>
+    {{ form.genre.label }}  {{ form.genre }}
+    <div class="submit-button">
+        {{ form.submit }}
+    </div>
 </form>
 
 </body>

@@ -1,12 +1,19 @@
 <html>
     <head>
-        <title>Login Page</title>
+        <title>KWMC Chatbot Events: Login Page</title>
     </head>
     <body>
+    <h2>KWMC Chatbot Events</h2>
+    Enter the password:
         <form action="" method="post">
-            {{ form.email }}
+            {{ form.username }}
             {{ form.password }}
             {{ form.csrf_token }}
+            <div class="submit-button">
+                {{ form.submit }}
+            </div>
         </form>
     </body>
+
+    If you're already logged in, <a href="/data">go to the data entry page</a>.
 </html>

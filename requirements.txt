@@ -12,9 +12,9 @@ idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10.3
 MarkupSafe==1.1.1
-mkl-fft==1.0.14
-mkl-random==1.1.0
-mkl-service==2.3.0
+mkl-fft==1.0.6
+mkl-random==1.0.1.1
+# mkl-service==2.3.0
 multidict==4.7.3
 numpy==1.17.2
 pandas==0.25.2
@@ -30,3 +30,6 @@ six==1.12.0
 urllib3==1.25.8
 Werkzeug==0.16.0
 yarl==1.4.2
+
+beautifulsoup4~=4.6.0
+sister~=0.1.5

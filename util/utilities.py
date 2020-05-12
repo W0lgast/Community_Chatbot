@@ -187,7 +187,7 @@ def merge_events(api_events: list, pd_events: pd.DataFrame) :
     pd_events['startDate'] = pd.to_datetime(pd_events['startDate'])
     pd_events['startDate'] = pd_events['startDate'].dt.strftime('%Y-%m-%d')
     pd_events["endDate"] = pd_events["startDate"]
-    pd_events["image"] = "https://theparkcentre.org.uk/wp/wp-content/uploads/2017/07/cropped-logo-small-1.png"
+    pd_events["image"] = "" #"https://theparkcentre.org.uk/wp/wp-content/uploads/2017/07/cropped-logo-small-1.png"
     hardcoded_list_of_dicts = list( pd_events.T.to_dict().values() )
 
     for event in hardcoded_list_of_dicts :

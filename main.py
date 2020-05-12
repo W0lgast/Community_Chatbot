@@ -1,46 +1,48 @@
 '''
-Will initialise the chatbot.
+Runs all the services we want.
 
-Kipp Freud
-28/10/2019
+Currently, an Events bot and a data entry
+
+Kipp Freud & Gavin Leech
+15/04/2020
 '''
 
 #------------------------------------------------------------------
 
 from util.message import message
 import util.utilities as ut
-from knowledge.knowledge_base import CKnowledgeBase
-from frontend.web_frontend import CWebFrontend
-from NLP.query_engine import CQueryEngine
+from NLP.event_engine import CEventEngine
 from frontend.terminal_frontend import CTerminalFrontend
+from frontend.botui_frontend import CBotUIFrontend
 
 #------------------------------------------------------------------
 
-PATH_TO_DATA = "data/history_data.csv"
 
-#------------------------------------------------------------------
+def run_events_bot():
+    agent = CEventEngine()
+    message.logDebug("Agent loaded.", "main::main")
+
+    # initialize frontend
+    return CBotUIFrontend(agent)
+
+
+def run_event_form() :
+    message.logDebug("Form launched", "main::main")
+    return 
 
 
 def main():
     '''
-    This will initialize the chatbot.
+    This will run the specified components
     '''
+    # TODO: Probably have to spawn two threads
+    # TODO: Is this best left as two scripts anyway?
+    #run_event_form()
+    run_events_bot().start()
 
-    # initialise knowledge base
-    knowledge = CKnowledgeBase(PATH_TO_DATA)
-    message.logDebug("Knowledge base loaded.","main::main")
-
-    # initialise nlp module
-    agent = CQueryEngine(knowledge)
-    message.logDebug("Agent loaded.","main::main")
-
-    # initialize frontend
-    frontend = CWebFrontend(agent)
-    frontend.start()
 
 
 if __name__ == "__main__":
     main()
     ut.exit(1)
-
 
